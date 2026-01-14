@@ -161,10 +161,10 @@ export const useSources = (notebookId?: string) => {
 
   const updateSource = useMutation({
     mutationFn: async ({
-      sourceId,
+      id,
       updates,
     }: {
-      sourceId: string;
+      id: string;
       updates: {
         title?: string;
         file_path?: string;
@@ -174,7 +174,7 @@ export const useSources = (notebookId?: string) => {
       const { data, error } = await supabase
         .from("sources")
         .update(updates)
-        .eq("id", sourceId)
+        .eq("id", id)
         .select()
         .single();
 

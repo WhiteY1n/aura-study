@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useSources } from "@/hooks/use-sources";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { useDocumentProcessing } from "@/hooks/use-document-processing";
+import { useNotebookGeneration } from "@/hooks/use-notebook-generation";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddSourceDialogProps {
@@ -31,6 +34,9 @@ export function AddSourceDialog({
   const { toast } = useToast();
 
   const { addSourceAsync, updateSource } = useSources(projectId);
+  const { uploadFile } = useFileUpload();
+  const { processDocumentAsync } = useDocumentProcessing();
+  const { generateNotebookContentAsync } = useNotebookGeneration();
 
   const handleOptionClick = (optionId: string) => {
     if (optionId === "upload") {
@@ -69,32 +75,103 @@ export function AddSourceDialog({
     setIsUploading(true);
 
     try {
-      // Create sources for all files
-      const createdSources = await Promise.all(
-        files.map(async (file) => {
-          const fileType = file.type.includes("pdf")
-            ? "pdf"
-            : file.type.includes("audio")
-              ? "audio"
-              : "text";
+      // Process each file sequentially
+      for (const file of files) {
+        const fileType = file.type.includes("pdf")
+          ? "pdf"
+          : file.type.includes("audio")
+            ? "audio"
+            : "text";
 
-          const sourceData = {
+        // Step 1: Create source record in database with "uploading" status
+        const sourceData = {
+          notebookId: projectId,
+          title: file.name,
+          type: fileType as "pdf" | "text" | "website" | "youtube" | "audio",
+          file_size: file.size,
+          processing_status: "uploading",
+          metadata: {
+            fileName: file.name,
+            fileType: file.type,
+          },
+        };
+
+        const createdSource = await addSourceAsync(sourceData);
+        
+        if (!createdSource?.id) {
+          throw new Error("Failed to create source record");
+        }
+
+        // Step 2: Upload file to Supabase Storage
+        const filePath = await uploadFile(file, projectId, createdSource.id);
+        
+        if (!filePath) {
+          // Update source status to failed
+          await updateSource({
+            id: createdSource.id,
+            updates: { processing_status: "failed" },
+          });
+          throw new Error(`Failed to upload file: ${file.name}`);
+        }
+
+        // Step 3: Update source with file_path and set status to "processing"
+        await updateSource({
+          id: createdSource.id,
+          updates: {
+            file_path: filePath,
+            processing_status: "processing",
+          },
+        });
+
+        // Step 4: Trigger document processing via Edge Function
+        try {
+          await processDocumentAsync({
+            sourceId: createdSource.id,
+            filePath,
+            sourceType: fileType,
+          });
+        } catch (processError) {
+          console.error("Document processing failed:", processError);
+          // Don't throw - the file is uploaded, processing can be retried
+          await updateSource({
+            id: createdSource.id,
+            updates: { processing_status: "pending" },
+          });
+        }
+
+        // Step 5: Generate notebook content (title, description, questions) - only for first file
+        // Run in background, don't wait for it
+        if (files.indexOf(file) === 0) {
+          generateNotebookContentAsync({
             notebookId: projectId,
-            title: file.name,
-            type: fileType as "pdf" | "text" | "website" | "youtube" | "audio",
-            file_size: file.size,
-            processing_status: "pending",
-            metadata: {
-              fileName: file.name,
-              fileType: file.type,
-            },
-          };
+            filePath,
+            sourceType: fileType,
+          }).catch(async (genError) => {
+            console.error("Notebook content generation failed:", genError);
+            // Fallback: Update notebook with simple title from filename
+            try {
+              const supabase = (await import("@/lib/supabase/client")).createClient();
+              const simpleName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+              const icon = fileType === "pdf" ? "📄" : fileType === "audio" ? "🎵" : "📝";
+              
+              await supabase
+                .from("notebooks")
+                .update({
+                  title: simpleName,
+                  icon: icon,
+                  generation_status: "completed",
+                })
+                .eq("id", projectId);
+              
+              console.log("Fallback: Updated notebook with simple title:", simpleName);
+            } catch (fallbackError) {
+              console.error("Fallback title update also failed:", fallbackError);
+            }
+          });
+        }
+      }
 
-          return await addSourceAsync(sourceData);
-        })
-      );
-
-      // Close dialog
+      // Close dialog immediately after upload completes
       setIsUploading(false);
       onOpenChange(false);
 
@@ -107,12 +184,9 @@ export function AddSourceDialog({
       onSourceAdded?.();
 
       toast({
-        title: "Files Added",
-        description: `${files.length} file${files.length > 1 ? "s" : ""} added successfully`,
+        title: "Files Uploaded",
+        description: `${files.length} file${files.length > 1 ? "s" : ""} uploaded and processing started`,
       });
-
-      // TODO: Process files in background (upload, document processing)
-      // This would require additional hooks like useFileUpload, useDocumentProcessing
     } catch (error: unknown) {
       console.error("Error during file upload:", error);
       setIsUploading(false);
