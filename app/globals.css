@@ -47,6 +47,13 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
   
+  /* Custom shadows */
+  --shadow-soft: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 4px 16px -4px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px -4px rgba(0, 0, 0, 0.08), 0 8px 24px -8px rgba(0, 0, 0, 0.12);
+  --shadow-elevated: 0 8px 24px -8px rgba(0, 0, 0, 0.1), 0 16px 48px -16px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 24px -4px hsl(221 85% 54% / 0.25);
+  --shadow-glow-accent: 0 0 24px -4px hsl(262 52% 47% / 0.25);
+  
   /* Custom colors for studio */
   --color-studio: var(--studio);
   --color-studio-foreground: var(--studio-foreground);
@@ -425,4 +432,25 @@ input[data-lpignore="true"] {
 
 input[type="password"][data-lpignore="true"]::-webkit-textfield-decoration-container {
   padding-right: 0;
+}
+
+/* Custom shadow utilities */
+.shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-medium {
+  box-shadow: var(--shadow-medium);
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.shadow-glow-accent {
+  box-shadow: var(--shadow-glow-accent);
 }

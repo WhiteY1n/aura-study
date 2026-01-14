@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background gradient circle -->
+  <circle cx="32" cy="32" r="30" fill="url(#grad1)"/>
+  
+  <!-- Sparkles icon -->
+  <g fill="white">
+    <!-- Main sparkle -->
+    <path d="M32 10 L34 18 L42 20 L34 22 L32 30 L30 22 L22 20 L30 18 Z"/>
+    <!-- Secondary sparkles -->
+    <path d="M46 24 L47 28 L51 29 L47 30 L46 34 L45 30 L41 29 L45 28 Z"/>
+    <path d="M18 40 L19 44 L23 45 L19 46 L18 50 L17 46 L13 45 L17 44 Z"/>
+  </g>
+  
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:hsl(var(--primary));stop-opacity:1" />
+      <stop offset="100%" style="stop-color:hsl(var(--accent));stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

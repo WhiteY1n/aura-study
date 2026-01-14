@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   TopNav,
   SearchBar,
@@ -95,7 +104,7 @@ export default function DashboardPage() {
         .insert({
           user_id: user.id,
           title: "Untitled notebook",
-          emoji: "📝",
+          icon: "📝",
         })
         .select()
         .single();
@@ -146,9 +155,21 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-background">
         <TopNav />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 flex-1 max-w-md" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-20" />
+            </div>
+            <Skeleton className="h-10 w-32" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <Skeleton key={i} className="h-48 rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -169,112 +190,166 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background">
       <TopNav />
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-56px)] flex flex-col">
         {projects.length === 0 ? (
           <EmptyState onCreateProject={handleCreateProject} />
         ) : (
-          <FadeIn>
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h1 className="text-2xl font-semibold">My Notebooks</h1>
+          <div className="space-y-6 flex-1 flex flex-col">
+            {/* Search + Sort + Layout toggle row */}
+            <FadeIn>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+                  <SearchBar
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="flex-1 min-w-0"
+                  />
+                  <SortDropdown value={sortBy} onValueChange={setSortBy} />
+                </div>
+                <LayoutToggle layout={layout} onLayoutChange={setLayout} />
+              </div>
+            </FadeIn>
+
+            {/* Create button */}
+            <FadeIn delay={0.1}>
               <Button
                 onClick={handleCreateProject}
+                className="gap-2 select-none"
                 disabled={isCreating}
-                className="gap-2"
               >
                 {isCreating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Plus className="h-4 w-4" />
                 )}
-                New notebook
+                Create new
               </Button>
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <SearchBar
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="flex-1 max-w-md"
-              />
-              <div className="flex items-center gap-2">
-                <SortDropdown value={sortBy} onValueChange={setSortBy} />
-                <LayoutToggle layout={layout} onLayoutChange={setLayout} />
-              </div>
-            </div>
+            </FadeIn>
 
             {/* Projects grid/list */}
             {filteredProjects.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-16 flex-1">
                 <p className="text-muted-foreground">
-                  No notebooks match your search.
+                  No notebooks found matching &quot;{searchQuery}&quot;
                 </p>
               </div>
             ) : (
-              <>
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={layout}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={
-                      layout === "grid"
-                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                        : "flex flex-col gap-3"
-                    }
+              <div className="flex-1 flex flex-col">
+                {layout === "grid" ? (
+                  <div 
+                    key={`grid-${sortBy}-${currentPage}`}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                   >
                     {paginatedProjects.map((project, index) => (
-                      <motion.div
-                        key={project.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
+                      <FadeIn key={`${project.id}-${sortBy}`} delay={index * 0.05}>
                         <ProjectCard
                           project={project}
-                          layout={layout}
+                          layout="grid"
                           onRename={handleRename}
                           onDelete={handleDelete}
                         />
-                      </motion.div>
+                      </FadeIn>
                     ))}
-                  </motion.div>
-                </AnimatePresence>
+                  </div>
+                ) : (
+                  <div key={`list-${sortBy}-${currentPage}`} className="space-y-2">
+                    {paginatedProjects.map((project, index) => (
+                      <FadeIn key={`${project.id}-${sortBy}`} delay={index * 0.03}>
+                        <ProjectCard
+                          project={project}
+                          layout="list"
+                          onRename={handleRename}
+                          onDelete={handleDelete}
+                        />
+                      </FadeIn>
+                    ))}
+                  </div>
+                )}
+
+                {/* Spacer to push pagination to bottom */}
+                <div className="flex-1" />
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-8">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
-                      }
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground px-4">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <FadeIn delay={0.2}>
+                    <Pagination className="mt-8 select-none">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentPage > 1) setCurrentPage(currentPage - 1);
+                            }}
+                            className={
+                              currentPage === 1
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
+                          />
+                        </PaginationItem>
+
+                        {/* Page numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                          (page) => {
+                            const showPage =
+                              page === 1 ||
+                              page === totalPages ||
+                              (page >= currentPage - 1 && page <= currentPage + 1);
+
+                            const showEllipsisBefore =
+                              page === currentPage - 2 && currentPage > 3;
+                            const showEllipsisAfter =
+                              page === currentPage + 2 &&
+                              currentPage < totalPages - 2;
+
+                            if (showEllipsisBefore || showEllipsisAfter) {
+                              return (
+                                <PaginationItem key={page}>
+                                  <PaginationEllipsis />
+                                </PaginationItem>
+                              );
+                            }
+
+                            if (!showPage) return null;
+
+                            return (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCurrentPage(page);
+                                  }}
+                                  isActive={currentPage === page}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          }
+                        )}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (currentPage < totalPages)
+                                setCurrentPage(currentPage + 1);
+                            }}
+                            className={
+                              currentPage === totalPages
+                                ? "pointer-events-none opacity-50"
+                                : "cursor-pointer"
+                            }
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </FadeIn>
                 )}
-              </>
+              </div>
             )}
-          </FadeIn>
+          </div>
         )}
       </main>
     </div>

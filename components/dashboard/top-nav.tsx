@@ -35,7 +35,13 @@ export function TopNav() {
   const router = useRouter();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const supabase = createClient();
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -98,10 +104,14 @@ export function TopNav() {
               onClick={() => setTheme(isDark ? "light" : "dark")}
               className="text-muted-foreground hover:text-foreground"
             >
-              {isDark ? (
-                <Sun className="h-5 w-5" />
+              {mounted ? (
+                isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )
               ) : (
-                <Moon className="h-5 w-5" />
+                <Sun className="h-5 w-5 opacity-0" />
               )}
             </Button>
           </motion.div>

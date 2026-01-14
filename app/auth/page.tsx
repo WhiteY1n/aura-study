@@ -283,18 +283,11 @@ export default function AuthPage() {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-2"
             >
-              <svg
-                className="h-8 w-8 text-primary"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
+              <img
+                src="/icon.svg"
+                alt="Aura Notebook"
+                className="h-8 w-8"
+              />
             </motion.div>
             <div className="text-sm font-semibold text-primary">
               Aura Notebook
@@ -302,16 +295,16 @@ export default function AuthPage() {
             <CardTitle className="text-2xl font-bold select-none">
               {isLogin ? "Welcome back" : "Create account"}
             </CardTitle>
-            <CardDescription className="space-y-1 select-none">
-              <div className="text-base font-medium text-foreground/80">
+            <div className="space-y-1 select-none text-sm text-muted-foreground">
+              <p className="text-base font-medium text-foreground/80">
                 Transform your learning with AI-powered study notebooks
-              </div>
-              <div className="text-sm text-muted-foreground">
+              </p>
+              <p>
                 {isLogin
                   ? "Sign in to access your personalized study materials"
                   : "Create intelligent notes, generate summaries, and enhance your learning experience"}
-              </div>
-            </CardDescription>
+              </p>
+            </div>
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
