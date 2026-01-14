@@ -432,10 +432,7 @@ export function SourcePanel({
           renameSource
             ? {
                 id: renameSource.id,
-                name: renameSource.title,
-                source_type: renameSource.type,
-                extracted_text: renameSource.content,
-                created_at: "",
+                title: renameSource.title,
               }
             : null
         }
