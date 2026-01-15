@@ -75,9 +75,6 @@ export default function ProjectView() {
     null
   );
   const [showAiLoading, setShowAiLoading] = useState(false);
-  const [clickedQuestions, setClickedQuestions] = useState<Set<string>>(
-    new Set()
-  );
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [highlightedCitation, setHighlightedCitation] = useState<Citation | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -238,7 +235,6 @@ export default function ProjectView() {
   const handleClearChat = async () => {
     if (!id) return;
     deleteChatHistory(id);
-    setClickedQuestions(new Set());
   };
 
   const handleCitationClick = (citation: Citation) => {
@@ -256,10 +252,6 @@ export default function ProjectView() {
       setHighlightedCitation(null);
     }
   };
-
-  const handleQuestionClick = useCallback((question: string) => {
-    setClickedQuestions((prev) => new Set(prev).add(question));
-  }, []);
 
   const handleLogout = async () => {
     await signOut();
@@ -433,14 +425,11 @@ export default function ProjectView() {
               isTyping={isSending}
               onSendMessage={handleSendMessage}
               exampleQuestions={
-                (project?.example_questions as string[] | undefined)?.filter(
-                  (q) => !clickedQuestions.has(q)
-                ) || []
+                (project?.example_questions as string[] | undefined) || []
               }
               onClearChat={handleClearChat}
               isDeletingChatHistory={isDeletingChatHistory}
               onCitationClick={handleCitationClick}
-              onQuestionClick={handleQuestionClick}
               notebookId={id}
               notebook={{
                 title: project?.title ?? undefined,
