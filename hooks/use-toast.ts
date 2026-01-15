@@ -9,14 +9,19 @@ export function useToast() {
       title?: string;
       description?: string;
       variant?: "default" | "destructive";
+      duration?: number;
     }) => {
+      const duration = props.duration ?? 2000; // Default 2 seconds (faster)
+      
       if (props.variant === "destructive") {
         toast.error(props.title, {
           description: props.description,
+          duration,
         });
       } else {
         toast.success(props.title, {
           description: props.description,
+          duration,
         });
       }
     },

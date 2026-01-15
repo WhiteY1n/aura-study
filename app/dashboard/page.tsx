@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -34,7 +33,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { notebooks, isLoading, error } = useNotebooks();
   const { deleteNotebook } = useNotebookDelete();
   const { updateNotebook } = useNotebookUpdate();
@@ -152,25 +151,11 @@ export default function DashboardPage() {
     deleteNotebook(id);
   };
 
-  if (isLoading) {
+  // Show loading when auth is loading or when user is null (logging out)
+  if (isLoading || authLoading || !user) {
     return (
-      <div className="min-h-screen bg-background">
-        <TopNav />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 flex-1 max-w-md" />
-              <Skeleton className="h-10 w-32" />
-              <Skeleton className="h-10 w-20" />
-            </div>
-            <Skeleton className="h-10 w-32" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className="h-48 rounded-xl" />
-              ))}
-            </div>
-          </div>
-        </main>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
