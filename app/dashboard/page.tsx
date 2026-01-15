@@ -105,6 +105,7 @@ export default function DashboardPage() {
           user_id: user.id,
           title: "Untitled notebook",
           icon: "📝",
+          generation_status: "pending",
         })
         .select()
         .single();

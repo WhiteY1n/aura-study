@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Upload, Link, Clipboard } from "lucide-react";
 import {
   Dialog,
@@ -328,6 +329,16 @@ export function AddSourceDialog({
   );
 }
 
+// Helper function to extract domain from URL
+function extractDomain(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname;
+  } catch {
+    return url;
+  }
+}
+
 // Website Dialog Component
 function AddWebsiteDialog({
   open,
@@ -340,41 +351,106 @@ function AddWebsiteDialog({
   projectId: string;
   onSourceAdded?: () => void;
 }) {
-  const [url, setUrl] = useState("");
+  const [textareaValue, setTextareaValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { addSourceAsync } = useSources(projectId);
+  const queryClient = useQueryClient();
+
+  // Parse URLs from textarea
+  const validUrls = textareaValue
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => {
+      try {
+        new URL(line);
+        return true;
+      } catch {
+        return false;
+      }
+    });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url.trim()) return;
+    if (validUrls.length === 0) return;
 
     setIsSubmitting(true);
 
     try {
-      // Extract domain as title
-      const urlObj = new URL(url);
-      const title = urlObj.hostname;
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      
+      // Debug: Log URLs
+      console.log("Valid URLs:", validUrls);
+      
+      // Create sources for each URL
+      const createdSources = [];
+      for (let i = 0; i < validUrls.length; i++) {
+        const url = validUrls[i];
+        console.log(`Creating source for URL ${i + 1}:`, url);
+        const domain = extractDomain(url);
+        console.log(`Extracted domain:`, domain);
+        
+        const source = await addSourceAsync({
+          notebookId: projectId,
+          title: `Website ${i + 1}: ${domain}`,
+          type: "website",
+          url: url,
+          processing_status: "processing",
+          metadata: {
+            originalUrl: url,
+            webhookProcessed: true,
+          },
+        });
+        createdSources.push(source);
+      }
 
-      await addSourceAsync({
-        notebookId: projectId,
-        title,
-        type: "website",
-        url: url.trim(),
-        processing_status: "pending",
-      });
+      // Call process-additional-sources edge function - let n8n update the title
+      if (createdSources.length > 0) {
+        console.log('Calling process-additional-sources edge function...');
+        try {
+          const { data: webhookData, error: webhookError } = await supabase.functions.invoke(
+            "process-additional-sources",
+            {
+              body: {
+                type: "multiple-websites",
+                notebookId: projectId,
+                urls: validUrls,
+                sourceIds: createdSources.map((source) => source.id),
+                timestamp: new Date().toISOString(),
+              },
+            }
+          );
 
-      toast({
-        title: "Website added",
-        description: "The website is being processed",
-      });
+          if (webhookError) {
+            console.error("Webhook error:", webhookError);
+            toast({
+              title: "Partial success",
+              description: `${validUrls.length} website${validUrls.length > 1 ? "s" : ""} added but processing may be delayed.`,
+              variant: "default",
+            });
+          } else {
+            console.log("Webhook response:", webhookData);
+            toast({
+              title: "Success",
+              description: `${validUrls.length} website${validUrls.length > 1 ? "s" : ""} added and sent for processing`,
+            });
+          }
+        } catch (webhookErr) {
+          console.error("Webhook call failed:", webhookErr);
+          toast({
+            title: "Partial success",
+            description: `${validUrls.length} website${validUrls.length > 1 ? "s" : ""} added but processing may be delayed.`,
+            variant: "default",
+          });
+        }
+      }
 
-      setUrl("");
+      setTextareaValue("");
       onOpenChange(false);
       onSourceAdded?.();
     } catch (error: unknown) {
       toast({
-        title: "Failed to add website",
+        title: "Failed to add websites",
         description:
           error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
@@ -388,17 +464,24 @@ function AddWebsiteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Website URL</DialogTitle>
+          <DialogTitle>Add Website URLs</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Enter multiple URLs, one per line
+          </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            required
+          <textarea
+            value={textareaValue}
+            onChange={(e) => setTextareaValue(e.target.value)}
+            placeholder={`https://example.com\nhttps://another-site.com`}
+            rows={5}
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none font-mono text-sm"
           />
+          {validUrls.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {validUrls.length} valid URL(s) detected
+            </p>
+          )}
           <div className="flex justify-end gap-2">
             <button
               type="button"
@@ -409,10 +492,10 @@ function AddWebsiteDialog({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !url.trim()}
+              disabled={isSubmitting || validUrls.length === 0}
               className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
             >
-              {isSubmitting ? "Adding..." : "Add"}
+              {isSubmitting ? "Adding..." : `Add ${validUrls.length} Website${validUrls.length !== 1 ? "s" : ""}`}
             </button>
           </div>
         </form>
@@ -438,6 +521,7 @@ function AddCopiedTextDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { addSourceAsync } = useSources(projectId);
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -446,18 +530,64 @@ function AddCopiedTextDialog({
     setIsSubmitting(true);
 
     try {
-      await addSourceAsync({
+      const supabase = (await import("@/lib/supabase/client")).createClient();
+      const sourceTitle = title.trim() || "Pasted Text";
+      
+      console.log("Creating text source:", sourceTitle);
+      
+      // Create source record
+      const createdSource = await addSourceAsync({
         notebookId: projectId,
-        title: title.trim() || "Pasted Text",
+        title: sourceTitle,
         type: "text",
         content: content.trim(),
-        processing_status: "pending",
+        processing_status: "processing",
+        metadata: {
+          characterCount: content.length,
+          webhookProcessed: true,
+        },
       });
 
-      toast({
-        title: "Text added",
-        description: "Your text is being processed",
-      });
+      console.log("Source created:", createdSource?.id);
+
+      // Call process-additional-sources edge function - let n8n update the title
+      try {
+        const { data: webhookData, error: webhookError } = await supabase.functions.invoke(
+          "process-additional-sources",
+          {
+            body: {
+              type: "copied-text",
+              notebookId: projectId,
+              title: sourceTitle,
+              content: content.trim(),
+              sourceIds: [createdSource.id],
+              timestamp: new Date().toISOString(),
+            },
+          }
+        );
+
+        if (webhookError) {
+          console.error("Webhook error:", webhookError);
+          toast({
+            title: "Partial success",
+            description: "Text added but processing may be delayed.",
+            variant: "default",
+          });
+        } else {
+          console.log("Webhook response:", webhookData);
+          toast({
+            title: "Success",
+            description: "Text has been added and sent for processing",
+          });
+        }
+      } catch (webhookErr) {
+        console.error("Webhook call failed:", webhookErr);
+        toast({
+          title: "Partial success",
+          description: "Text added but processing may be delayed.",
+          variant: "default",
+        });
+      }
 
       setTitle("");
       setContent("");

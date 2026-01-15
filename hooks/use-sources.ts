@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useEffect } from "react";
+import { useNotebookGeneration } from "./use-notebook-generation";
 
 export interface Source {
   id: string;
@@ -25,6 +26,7 @@ export const useSources = (notebookId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const supabase = createClient();
+  const { generateNotebookContentAsync } = useNotebookGeneration();
 
   const {
     data: sources = [],
@@ -153,7 +155,57 @@ export const useSources = (notebookId?: string) => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (newSource) => {
+      console.log("Source added successfully:", newSource);
+      
+      // The Realtime subscription will handle updating the cache
+      // But we still check for first source to trigger generation
+      const currentSources = queryClient.getQueryData(["sources", notebookId]) as Source[] | undefined;
+      const isFirstSource = !currentSources || currentSources.length === 0;
+      
+      if (isFirstSource && notebookId) {
+        console.log("This is the first source, checking notebook generation status...");
+        
+        // Check notebook generation status
+        const { data: notebook } = await supabase
+          .from("notebooks")
+          .select("generation_status")
+          .eq("id", notebookId)
+          .single();
+        
+        if (notebook?.generation_status === "pending") {
+          console.log("Triggering notebook content generation...");
+          
+          // Determine if we can trigger generation based on source type and available data
+          const canGenerate = 
+            (newSource.type === "pdf" && newSource.file_path) ||
+            (newSource.type === "text" && newSource.content) ||
+            (newSource.type === "website" && newSource.url) ||
+            (newSource.type === "youtube" && newSource.url) ||
+            (newSource.type === "audio" && newSource.file_path);
+          
+          if (canGenerate) {
+            try {
+              // For text sources, don't pass filePath - let edge function query database
+              // For other sources, pass file_path or url
+              const sourceFilePath = (newSource.type === "text") 
+                ? undefined 
+                : (newSource.file_path || newSource.url);
+              
+              await generateNotebookContentAsync({
+                notebookId,
+                filePath: sourceFilePath ?? undefined,
+                sourceType: newSource.type,
+              });
+            } catch (error) {
+              console.error("Failed to generate notebook content:", error);
+            }
+          } else {
+            console.log("Source not ready for generation yet - missing required data");
+          }
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["sources", notebookId] });
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
     },
@@ -181,7 +233,37 @@ export const useSources = (notebookId?: string) => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (updatedSource) => {
+      // The Realtime subscription will handle updating the cache
+      
+      // If file_path was added and this is the first source, trigger generation
+      if (updatedSource.file_path && notebookId) {
+        const currentSources = queryClient.getQueryData(["sources", notebookId]) as Source[] | undefined;
+        const isFirstSource = currentSources && currentSources.length === 1;
+        
+        if (isFirstSource) {
+          const { data: notebook } = await supabase
+            .from("notebooks")
+            .select("generation_status")
+            .eq("id", notebookId)
+            .single();
+          
+          if (notebook?.generation_status === "pending") {
+            console.log("File path updated, triggering notebook content generation...");
+            
+            try {
+              await generateNotebookContentAsync({
+                notebookId,
+                filePath: updatedSource.file_path,
+                sourceType: updatedSource.type,
+              });
+            } catch (error) {
+              console.error("Failed to generate notebook content:", error);
+            }
+          }
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["sources", notebookId] });
     },
   });

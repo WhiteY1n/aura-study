@@ -86,6 +86,18 @@ export default function ProjectView() {
   const project = notebooks?.find((nb) => nb.id === id);
   const isLoading = notebooksLoading || sourcesLoading;
 
+  // Debug: Log notebook data when it changes
+  useEffect(() => {
+    if (project) {
+      console.log("ProjectView - Current notebook data:", {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        generation_status: project.generation_status,
+      });
+    }
+  }, [project]);
+
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
