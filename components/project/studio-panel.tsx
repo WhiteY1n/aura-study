@@ -384,7 +384,7 @@ export function StudioSheet(props: StudioPanelProps) {
           Studio
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[80vh] bg-background border-border p-0">
+      <SheetContent side="bottom" className="h-[80vh] bg-background border-border p-0" hideTitle title="Studio">
         <StudioContent {...props} />
       </SheetContent>
     </Sheet>

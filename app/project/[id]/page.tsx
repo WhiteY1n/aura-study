@@ -456,6 +456,8 @@ export default function ProjectView() {
       <SourceSheet
         projectId={id || ""}
         notebookId={id}
+        highlightedCitation={highlightedCitation}
+        onCitationClear={() => setHighlightedCitation(null)}
         onSourceClick={(source) => {
           setSelectedSourceId(source.id);
           setSelectedSourceForViewing({
