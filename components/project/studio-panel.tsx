@@ -35,8 +35,8 @@ interface StudioPanelProps {
   onCitationClick?: (citation: Citation) => void;
 }
 
-// Desktop panel content
-function StudioContent({
+// Desktop panel content - also exported for MobileTabs
+export function StudioContent({
   projectId,
   notebookId,
   onAddNote,

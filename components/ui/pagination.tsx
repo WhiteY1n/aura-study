@@ -58,6 +58,7 @@ function PaginationLink({
           variant: isActive ? "outline" : "ghost",
           size,
         }),
+        !isActive && "hover:opacity-70",
         className
       )}
       {...props}

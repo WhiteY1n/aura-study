@@ -127,9 +127,9 @@ export function ChatInput({
             {exampleQuestions.map((question, index) => (
               <Button
                 key={index}
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="whitespace-nowrap h-auto py-2 px-3 text-sm hover:bg-secondary flex-shrink-0"
+                className="whitespace-nowrap h-auto py-2 px-3 text-sm bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-primary/60 flex-shrink-0 transition-colors"
                 onClick={() => handleQuestionClick(question)}
                 disabled={disabled}
               >
@@ -148,7 +148,7 @@ export function ChatInput({
               whileTap={{ scale: 0.98 }}
               onClick={() => onSend(suggestion.prompt)}
               disabled={disabled}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-secondary hover:bg-secondary/80 text-foreground transition-colors disabled:opacity-50 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-muted text-foreground border border-border hover:bg-muted/80 hover:border-primary/60 transition-colors disabled:opacity-50 whitespace-nowrap"
             >
               <span>{suggestion.icon}</span>
               <span>{suggestion.label}</span>

@@ -183,7 +183,7 @@ export function SourceContentViewer({
       {/* Content */}
       <ScrollArea className="flex-1 h-full" ref={scrollAreaRef}>
         <div className="p-6 w-full">
-          <div className="prose prose-sm max-w-none dark:prose-invert space-y-0 w-full">
+          <div className="prose prose-sm max-w-none dark:prose-invert w-full">
             {contentLines.map((line, idx) => {
               const lineNumber = idx + 1; // Lines are 1-indexed
               const isHighlighted =
@@ -192,30 +192,39 @@ export function SourceContentViewer({
                 lineNumber <= endLine;
               const isFirstHighlightedLine =
                 isHighlighted && lineNumber === startLine;
-              const prevHighlighted =
-                startLine > 0 &&
-                lineNumber - 1 >= startLine &&
-                lineNumber - 1 <= endLine;
-              const shouldAddGapAbove =
-                idx !== 0 && !(isHighlighted && prevHighlighted);
-              const topGapClass = shouldAddGapAbove ? "mt-1" : "";
-              const highlightRadiusClass = isHighlighted
-                ? lineNumber === startLine
-                  ? "rounded-t"
-                  : lineNumber === endLine
-                    ? "rounded-b"
-                    : ""
-                : "rounded";
+              const isLastHighlightedLine =
+                isHighlighted && lineNumber === endLine;
+
+              // Determine rounded corners
+              let roundedClass = "";
+              if (isHighlighted) {
+                if (isFirstHighlightedLine && isLastHighlightedLine) {
+                  roundedClass = "rounded-lg";
+                } else if (isFirstHighlightedLine) {
+                  roundedClass = "rounded-t-lg";
+                } else if (isLastHighlightedLine) {
+                  roundedClass = "rounded-b-lg";
+                }
+              }
 
               return (
                 <div
                   key={idx}
                   ref={isFirstHighlightedLine ? highlightRef : null}
-                  className={`py-1 px-2 text-sm whitespace-pre-wrap break-words ${topGapClass} ${highlightRadiusClass} ${
+                  className={`py-0.5 px-2 text-sm whitespace-pre-wrap break-words leading-relaxed ${roundedClass} ${
                     isHighlighted
-                      ? "border border-primary bg-primary/20 dark:bg-primary/30"
-                      : "border border-transparent hover:bg-muted/50"
+                      ? "bg-primary/20 dark:bg-primary/30"
+                      : "hover:bg-muted/30"
                   }`}
+                  style={{
+                    // Add top border only on first highlighted line
+                    borderTop: isFirstHighlightedLine ? "2px solid hsl(var(--primary))" : "none",
+                    // Add bottom border only on last highlighted line
+                    borderBottom: isLastHighlightedLine ? "2px solid hsl(var(--primary))" : "none",
+                    // Add left/right borders for all highlighted lines
+                    borderLeft: isHighlighted ? "2px solid hsl(var(--primary))" : "none",
+                    borderRight: isHighlighted ? "2px solid hsl(var(--primary))" : "none",
+                  }}
                 >
                   <span
                     className={

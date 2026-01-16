@@ -235,13 +235,13 @@ export function AddSourceDialog({
               className={cn(
                 "w-full flex flex-col items-center justify-center gap-3 p-8 rounded-xl",
                 "border-2 border-dashed border-border/60",
-                "bg-muted/30 hover:bg-muted/60 hover:border-primary/40",
+                "bg-muted/30 hover:bg-muted/80 hover:border-primary/50",
                 "transition-all duration-200 group",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 isUploading && "opacity-50 cursor-not-allowed"
               )}
             >
-              <div className="p-4 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <div className="p-4 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/30 transition-colors">
                 <Upload className="h-8 w-8" />
               </div>
               <div className="text-center">
@@ -266,12 +266,12 @@ export function AddSourceDialog({
                 className={cn(
                   "flex flex-col items-center justify-center gap-2 p-4 rounded-xl",
                   "border border-border/60",
-                  "bg-background hover:bg-muted/40 hover:border-primary/40",
+                  "bg-background hover:bg-muted/70 hover:border-primary/50",
                   "transition-all duration-200 group",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 )}
               >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/30 transition-colors">
                   <Link className="h-5 w-5" />
                 </div>
                 <div className="text-center">
@@ -289,12 +289,12 @@ export function AddSourceDialog({
                 className={cn(
                   "flex flex-col items-center justify-center gap-2 p-4 rounded-xl",
                   "border border-border/60",
-                  "bg-background hover:bg-muted/40 hover:border-primary/40",
+                  "bg-background hover:bg-muted/70 hover:border-primary/50",
                   "transition-all duration-200 group",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 )}
               >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/30 transition-colors">
                   <Clipboard className="h-5 w-5" />
                 </div>
                 <div className="text-center">

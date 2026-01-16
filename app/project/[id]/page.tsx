@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { SourcePanel, type Source } from "@/components/viewer/source-panel";
 import { ChatPanel, type Message } from "@/components/viewer/chat-panel";
-import { SourceSheet } from "@/components/viewer/source-sheet";
+import { MobileTabs } from "@/components/viewer/mobile-tabs";
 import { AddSourceDialog } from "@/components/sources/add-source-dialog";
-import { StudioPanel, StudioSheet } from "@/components/project/studio-panel";
+import { StudioPanel, StudioSheet, StudioContent } from "@/components/project/studio-panel";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -40,6 +40,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useNotebooks } from "@/hooks/use-notebooks";
 import { useSources } from "@/hooks/use-sources";
+import { useSourceDelete } from "@/hooks/use-source-delete";
 import { useChatMessages } from "@/hooks/use-chat-messages";
 import { useToast } from "@/hooks/use-toast";
 import { createClient } from "@/lib/supabase/client";
@@ -59,6 +60,7 @@ export default function ProjectView() {
 
   const { notebooks, isLoading: notebooksLoading } = useNotebooks();
   const { sources: sourcesData, isLoading: sourcesLoading } = useSources(id);
+  const { deleteSource } = useSourceDelete();
   const {
     messages: chatMessages,
     sendMessage,
@@ -76,9 +78,10 @@ export default function ProjectView() {
   );
   const [showAiLoading, setShowAiLoading] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [highlightedCitation, setHighlightedCitation] = useState<Citation | null>(null);
+  const [highlightedCitation, setHighlightedCitation] = useState<Citation & { clickedAt?: number } | null>(null);
   const [mounted, setMounted] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [mobileActiveTab, setMobileActiveTab] = useState<"sources" | "chat" | "studio">("chat");
 
   const project = notebooks?.find((nb) => nb.id === id);
   const isLoading = notebooksLoading || sourcesLoading;
@@ -232,6 +235,27 @@ export default function ProjectView() {
     setSelectedSourceId(sourceId);
   };
 
+  const handleRemoveSource = async (sourceId: string) => {
+    try {
+      await deleteSource(sourceId);
+      if (selectedSourceId === sourceId) {
+        setSelectedSourceId(undefined);
+      }
+      toast({
+        title: "Source deleted",
+        description: "The source has been removed successfully",
+      });
+    } catch (error: unknown) {
+      console.error("Error deleting source:", error);
+      toast({
+        title: "Error deleting source",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleClearChat = async () => {
     if (!id) return;
     deleteChatHistory(id);
@@ -242,7 +266,10 @@ export default function ProjectView() {
     if (source) {
       setSelectedSourceId(source.id);
       setSelectedSourceForViewing(source);
-      setHighlightedCitation(citation);
+      setHighlightedCitation({
+        ...citation,
+        clickedAt: Date.now(), // Force re-trigger on mobile
+      });
     }
   };
 
@@ -361,10 +388,10 @@ export default function ProjectView() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sources Panel (Left) - hidden on mobile */}
-        <div className="hidden lg:flex h-full">
+      {/* Main Content - Desktop */}
+      <div className="flex-1 hidden lg:flex overflow-hidden">
+        {/* Sources Panel (Left) */}
+        <div className="flex h-full">
           <SourcePanel
             sources={sources}
             onSelectSource={handleSelectSource}
@@ -444,7 +471,7 @@ export default function ProjectView() {
           )}
         </div>
 
-        {/* Studio Panel (Right) - hidden on mobile */}
+        {/* Studio Panel (Right) */}
         <StudioPanel
           projectId={id || ""}
           notebookId={id}
@@ -452,27 +479,81 @@ export default function ProjectView() {
         />
       </div>
 
-      {/* Mobile Bottom Sheets */}
-      <SourceSheet
-        projectId={id || ""}
-        notebookId={id}
-        highlightedCitation={highlightedCitation}
-        onCitationClear={() => setHighlightedCitation(null)}
-        onSourceClick={(source) => {
-          setSelectedSourceId(source.id);
-          setSelectedSourceForViewing({
-            id: source.id,
-            title: source.title,
-            type: (source.type as Source["type"]) || "text",
-            content: source.content || undefined,
-          });
-        }}
-      />
-      <StudioSheet
-        projectId={id || ""}
-        notebookId={id}
-        onCitationClick={handleCitationClick}
-      />
+      {/* Main Content - Mobile (Tabs) */}
+      <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
+        <MobileTabs
+          sources={sources}
+          onRemoveSource={handleRemoveSource}
+          onSelectSource={handleSelectSource}
+          selectedSourceId={selectedSourceId}
+          projectId={id || ""}
+          onSourceAdded={handleSourceAdded}
+          highlightedCitation={highlightedCitation}
+          activeTab={mobileActiveTab}
+          onTabChange={setMobileActiveTab}
+          chatContent={
+            !isLoading && !hasSources ? (
+              <div className="flex flex-col h-full">
+                <div className="flex-1 flex items-center justify-center p-8">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-col items-center text-center max-w-md"
+                  >
+                    <div className="p-6 rounded-full bg-primary/10 mb-6">
+                      <CloudUpload className="h-12 w-12 text-primary" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-foreground mb-2">
+                      Add a source to get started
+                    </h2>
+                    <p className="text-muted-foreground mb-8">
+                      Upload PDFs, add links, or paste content to begin
+                    </p>
+                    <Button
+                      size="lg"
+                      onClick={() => setAddDialogOpen(true)}
+                      className="gap-2"
+                    >
+                      <CloudUpload className="h-5 w-5" />
+                      Upload a source
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            ) : (
+              <ChatPanel
+                messages={messages}
+                isTyping={isSending}
+                onSendMessage={handleSendMessage}
+                exampleQuestions={
+                  (project?.example_questions as string[] | undefined) || []
+                }
+                onClearChat={handleClearChat}
+                isDeletingChatHistory={isDeletingChatHistory}
+                onCitationClick={handleCitationClick}
+                notebookId={id}
+                notebook={{
+                  title: project?.title ?? undefined,
+                  description: project?.description ?? undefined,
+                  icon: project?.icon ?? undefined,
+                  generation_status: project?.generation_status ?? undefined,
+                }}
+                sourceCount={sources.length}
+                pendingUserMessage={pendingUserMessage}
+                showAiLoading={showAiLoading}
+              />
+            )
+          }
+          studioContent={
+            <StudioContent
+              projectId={id || ""}
+              notebookId={id}
+              onCitationClick={handleCitationClick}
+            />
+          }
+        />
+      </div>
 
       {/* Add Source Dialog */}
       <AddSourceDialog
