@@ -82,9 +82,9 @@ export function SourceSheet({
           id: source.id,
           title: source.title,
           type: source.type,
-          content: source.content ?? undefined,
-          summary: source.summary ?? undefined,
-          url: source.url ?? undefined,
+          content: source.content ?? null,
+          summary: source.summary ?? null,
+          url: source.url ?? null,
         });
         setOpen(true);
       }
@@ -96,9 +96,9 @@ export function SourceSheet({
       id: source.id,
       title: source.title,
       type: source.type,
-      content: source.content ?? undefined,
-      summary: source.summary ?? undefined,
-      url: source.url ?? undefined,
+      content: source.content ?? null,
+      summary: source.summary ?? null,
+      url: source.url ?? null,
     });
     onSourceClick?.(source);
   };
