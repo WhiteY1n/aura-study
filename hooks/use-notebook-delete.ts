@@ -16,7 +16,7 @@ export const useNotebookDelete = () => {
       console.log("Starting notebook deletion process for:", notebookId);
 
       try {
-        // First, get the notebook details for better error reporting
+        // Đầu tiên lấy thông tin notebook để báo lỗi rõ hơn
         const { data: notebook, error: fetchError } = await supabase
           .from("notebooks")
           .select("id, title")
@@ -30,7 +30,7 @@ export const useNotebookDelete = () => {
 
         console.log("Found notebook to delete:", notebook.title);
 
-        // Get all sources for this notebook to delete their files
+        // Lấy tất cả nguồn của notebook để xóa file
         const { data: sources, error: sourcesError } = await supabase
           .from("sources")
           .select("id, title, file_path, type")
@@ -43,7 +43,7 @@ export const useNotebookDelete = () => {
 
         console.log(`Found ${sources?.length || 0} sources to clean up`);
 
-        // Delete all files from storage for sources that have file_path
+        // Xóa file ở storage cho các nguồn có file_path
         const filesToDelete =
           sources
             ?.filter((source) => source.file_path)
@@ -63,7 +63,7 @@ export const useNotebookDelete = () => {
           }
         }
 
-        // Delete the notebook - this will cascade delete all sources
+        // Xóa notebook - sẽ cascade xóa toàn bộ nguồn
         const { error: deleteError } = await supabase
           .from("notebooks")
           .delete()
@@ -84,7 +84,7 @@ export const useNotebookDelete = () => {
     onSuccess: (deletedNotebook, notebookId) => {
       console.log("Delete mutation success, invalidating queries");
 
-      // Invalidate all related queries
+      // Invalidate toàn bộ query liên quan
       queryClient.invalidateQueries({ queryKey: ["notebooks", user?.id] });
       queryClient.invalidateQueries({ queryKey: ["sources", notebookId] });
       queryClient.invalidateQueries({ queryKey: ["notebook", notebookId] });

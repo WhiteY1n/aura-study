@@ -52,7 +52,7 @@ export function NoteViewer({
     return "Note";
   };
 
-  // Parse content for AI responses
+  // Parse nội dung cho câu trả lời AI
   const parseContent = (contentStr: string) => {
     try {
       const parsed = JSON.parse(contentStr);
@@ -60,7 +60,7 @@ export function NoteViewer({
         return parsed;
       }
     } catch {
-      // Not JSON, return as string
+      // Không phải JSON thì trả về chuỗi
     }
     return contentStr;
   };
@@ -92,7 +92,7 @@ export function NoteViewer({
         </div>
       </div>
 
-      {/* Content */}
+      {/* Nội dung */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="p-4">
           {isAIResponse && typeof parsedContent === "object" ? (
@@ -109,7 +109,7 @@ export function NoteViewer({
         </div>
       </ScrollArea>
 
-      {/* Footer */}
+      {/* Chân trang */}
       {onDelete && (
         <div className="flex-shrink-0 p-4 border-t border-border/50">
           <AlertDialog>

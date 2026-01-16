@@ -182,7 +182,7 @@ export default function AuthPage() {
         } else {
           console.log("Sign up successful:", data);
 
-          // Check if user already exists
+          // Kiểm tra xem người dùng đã tồn tại chưa
           if (
             data.user &&
             data.user.identities &&
@@ -198,7 +198,7 @@ export default function AuthPage() {
             return;
           }
 
-          // Check if email confirmation is required
+          // Kiểm tra xem có cần xác nhận email không
           if (data.user && !data.session) {
             console.log("Email confirmation required for:", data.user.email);
             setPendingEmail(email);
@@ -234,7 +234,7 @@ export default function AuthPage() {
     );
   }
 
-  // Show email confirmation screen
+  // Hiển thị màn hình xác nhận email
   if (showEmailConfirmation) {
     return (
       <EmailConfirmation

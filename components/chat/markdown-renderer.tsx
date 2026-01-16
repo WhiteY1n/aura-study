@@ -51,7 +51,7 @@ export function MarkdownRenderer({
   onCitationClick,
   isUserMessage = false,
 }: MarkdownRendererProps) {
-  // Handle enhanced content with citations
+  // Xử lý nội dung đã kèm thông tin trích dẫn
   if (typeof content === "object" && "segments" in content) {
     return (
       <div className={className}>
@@ -65,7 +65,7 @@ export function MarkdownRenderer({
     );
   }
 
-  // For legacy string content, convert to simple format
+  // Với nội dung dạng chuỗi cũ, chuyển sang format đơn giản
   const segments: MessageSegment[] = [
     { text: typeof content === "string" ? content : "" },
   ];
@@ -89,7 +89,7 @@ const processMarkdownWithCitations = (
   onCitationClick?: (citation: Citation) => void,
   isUserMessage: boolean = false
 ) => {
-  // For user messages, render as inline content
+  // Tin nhắn người dùng: render inline
   if (isUserMessage) {
     return (
       <span>
@@ -120,7 +120,7 @@ const processMarkdownWithCitations = (
     );
   }
 
-  // For AI messages, treat each segment as a potential paragraph
+  // Tin nhắn AI: mỗi segment có thể là một đoạn
   const paragraphs: React.JSX.Element[] = [];
 
   segments.forEach((segment, segmentIndex) => {
@@ -128,7 +128,7 @@ const processMarkdownWithCitations = (
       ? citations.find((c) => c.citation_id === segment.citation_id)
       : undefined;
 
-    // Split segment text by double line breaks to handle multiple paragraphs
+    // Tách đoạn theo xuống dòng đôi để có nhiều đoạn văn
     const paragraphTexts = segment.text
       .split("\n\n")
       .filter((text) => text.trim());
@@ -142,7 +142,7 @@ const processMarkdownWithCitations = (
           className="mb-4 leading-relaxed"
         >
           {processedContent}
-          {/* Add citation at the end of the paragraph if this is the last paragraph of the segment */}
+          {/* Thêm trích dẫn ở cuối đoạn nếu đây là đoạn cuối của segment */}
           {paragraphIndex === paragraphTexts.length - 1 &&
             citation &&
             onCitationClick && (

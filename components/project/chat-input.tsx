@@ -76,7 +76,7 @@ export function ChatInput({
 
   return (
     <div className="px-4 py-3 space-y-3">
-      {/* Input with arrow inside */}
+      {/* Ô nhập kèm nút mũi tên */}
       <form onSubmit={handleSubmit} className="relative">
         <div
           className={cn(
@@ -118,7 +118,7 @@ export function ChatInput({
         </div>
       </form>
 
-      {/* Example Questions or Static Suggestions */}
+      {/* Câu hỏi gợi ý hoặc gợi ý tĩnh */}
       {!disabled &&
         !pendingUserMessage &&
         !showAiLoading &&

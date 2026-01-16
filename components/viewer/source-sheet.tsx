@@ -73,7 +73,7 @@ export function SourceSheet({
   const { sources } = useSources(notebookId);
   const { deleteSource, isDeleting } = useSourceDelete();
 
-  // Auto-open sheet when citation is clicked
+  // Tự mở sheet khi người dùng bấm trích dẫn
   useEffect(() => {
     if (highlightedCitation) {
       const source = sources?.find((s) => s.id === highlightedCitation.source_id);
@@ -136,7 +136,7 @@ export function SourceSheet({
           hideTitle
           title="Sources"
         >
-          {/* Show source viewer if a source is selected */}
+          {/* Hiển thị nội dung nguồn khi đã chọn */}
           {selectedForViewing ? (
             <SourceContentViewer
               sourceTitle={selectedForViewing.title}
@@ -157,7 +157,7 @@ export function SourceSheet({
                 </div>
               </div>
 
-              {/* Sources list */}
+              {/* Danh sách nguồn */}
               <div className="flex-1 min-h-0 flex flex-col">
                 <ScrollArea className="flex-1">
                   <div className="p-4 space-y-2">
@@ -241,7 +241,7 @@ export function SourceSheet({
         projectId={projectId}
       />
 
-      {/* Delete confirmation dialog */}
+      {/* Dialog xác nhận xóa nguồn */}
       <AlertDialog
         open={deleteSourceId !== null}
         onOpenChange={(open) => !open && setDeleteSourceId(null)}

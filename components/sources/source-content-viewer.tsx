@@ -45,20 +45,20 @@ export function SourceContentViewer({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const lastCitationIdRef = useRef<number | undefined>(undefined);
 
-  // Split content into lines for better rendering
+  // Tách nội dung thành từng dòng để render đẹp hơn
   const contentLines = useMemo(() => {
     if (!sourceContent) return [];
     return sourceContent.split("\n");
   }, [sourceContent]);
 
-  // Check if we have valid citation line data for highlighting
+  // Kiểm tra dữ liệu dòng trích dẫn có hợp lệ để highlight không
   const hasValidCitationLines =
     highlightedCitation &&
     typeof highlightedCitation.chunk_lines_from === "number" &&
     typeof highlightedCitation.chunk_lines_to === "number" &&
     highlightedCitation.chunk_lines_from > 0;
 
-  // Calculate highlight range
+  // Tính phạm vi cần highlight
   const startLine = hasValidCitationLines
     ? highlightedCitation!.chunk_lines_from!
     : -1;
@@ -66,7 +66,7 @@ export function SourceContentViewer({
     ? highlightedCitation!.chunk_lines_to!
     : -1;
 
-  // Auto-scroll to highlighted text
+  // Tự cuộn đến đoạn được highlight
   useEffect(() => {
     if (hasValidCitationLines && highlightRef.current && scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector(
@@ -140,7 +140,7 @@ export function SourceContentViewer({
         </div>
       </div>
 
-      {/* Source Guide Accordion */}
+      {/* Accordion hướng dẫn nguồn */}
       {sourceSummary && (
         <div className="border-b border-border/50 flex-shrink-0">
           <Accordion type="single" collapsible>
@@ -159,7 +159,7 @@ export function SourceContentViewer({
                     </p>
                   </div>
 
-                  {/* Show URL for website sources */}
+                  {/* Hiển thị URL khi nguồn là website */}
                   {sourceType === "website" && sourceUrl && (
                     <div>
                       <h4 className="font-medium mb-2">URL</h4>
@@ -180,12 +180,12 @@ export function SourceContentViewer({
         </div>
       )}
 
-      {/* Content */}
+      {/* Nội dung */}
       <ScrollArea className="flex-1 h-full" ref={scrollAreaRef}>
         <div className="p-6 w-full">
           <div className="prose prose-sm max-w-none dark:prose-invert w-full">
             {contentLines.map((line, idx) => {
-              const lineNumber = idx + 1; // Lines are 1-indexed
+              const lineNumber = idx + 1; // Dòng được đánh số từ 1
               const isHighlighted =
                 startLine > 0 &&
                 lineNumber >= startLine &&
@@ -195,7 +195,7 @@ export function SourceContentViewer({
               const isLastHighlightedLine =
                 isHighlighted && lineNumber === endLine;
 
-              // Determine rounded corners
+              // Xác định bo góc khi highlight
               let roundedClass = "";
               if (isHighlighted) {
                 if (isFirstHighlightedLine && isLastHighlightedLine) {
@@ -217,11 +217,11 @@ export function SourceContentViewer({
                       : "hover:bg-muted/30"
                   }`}
                   style={{
-                    // Add top border only on first highlighted line
+                    // Thêm viền trên cho dòng highlight đầu tiên
                     borderTop: isFirstHighlightedLine ? "2px solid hsl(var(--primary))" : "none",
-                    // Add bottom border only on last highlighted line
+                    // Thêm viền dưới cho dòng highlight cuối
                     borderBottom: isLastHighlightedLine ? "2px solid hsl(var(--primary))" : "none",
-                    // Add left/right borders for all highlighted lines
+                    // Thêm viền trái/phải cho mọi dòng được highlight
                     borderLeft: isHighlighted ? "2px solid hsl(var(--primary))" : "none",
                     borderRight: isHighlighted ? "2px solid hsl(var(--primary))" : "none",
                   }}

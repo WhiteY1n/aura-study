@@ -25,7 +25,7 @@ export const useNotebooks = () => {
 
       console.log("Fetching notebooks for user:", user.id);
 
-      // First get the notebooks
+      // Bước 1: lấy danh sách notebook
       const { data: notebooksData, error: notebooksError } = await supabase
         .from("notebooks")
         .select("*")
@@ -37,7 +37,7 @@ export const useNotebooks = () => {
         throw notebooksError;
       }
 
-      // Then get source counts separately for each notebook
+      // Bước 2: đếm số nguồn cho từng notebook
       const notebooksWithCounts = await Promise.all(
         (notebooksData || []).map(async (notebook) => {
           const { count, error: countError } = await supabase
@@ -63,7 +63,7 @@ export const useNotebooks = () => {
     },
     enabled: isAuthenticated && !authLoading,
     retry: (failureCount, error) => {
-      // Don't retry on auth errors
+      // Không retry nếu lỗi xác thực
       if (
         error?.message?.includes("JWT") ||
         error?.message?.includes("auth")
@@ -74,7 +74,7 @@ export const useNotebooks = () => {
     },
   });
 
-  // Set up real-time subscription for notebooks updates
+  // Đăng ký realtime để nhận cập nhật notebooks
   useEffect(() => {
     if (!user?.id || !isAuthenticated) return;
 
@@ -93,7 +93,7 @@ export const useNotebooks = () => {
         (payload) => {
           console.log("Real-time notebook update received:", payload);
 
-          // Invalidate and refetch notebooks when any change occurs
+          // Invalidate và fetch lại notebooks khi có thay đổi
           queryClient.invalidateQueries({ queryKey: ["notebooks", user.id] });
         }
       )

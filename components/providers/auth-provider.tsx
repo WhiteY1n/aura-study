@@ -51,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      // Clear any previous errors on successful auth
+      // Xóa lỗi cũ khi xác thực thành công
       if (newSession && error) {
         setError(null);
       }
@@ -70,16 +70,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       console.log("AuthContext: Starting logout process...");
 
-      // Clear local state immediately to provide instant feedback
+      // Xóa trạng thái cục bộ ngay để phản hồi tức thì
       clearAuthState();
 
-      // Attempt to sign out from server
+      // Thử đăng xuất khỏi server
       const { error } = await supabase.auth.signOut();
 
       if (error) {
         console.log("AuthContext: Logout error:", error);
 
-        // If session is invalid on server, we've already cleared local state
+        // Nếu session trên server không hợp lệ thì trạng thái cục bộ đã được xóa rồi
         if (
           error.message.includes("session_not_found") ||
           error.message.includes("Session not found") ||
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           return;
         }
 
-        // For other errors, still ensure local session is cleared
+        // Với lỗi khác vẫn đảm bảo xóa session cục bộ
         await supabase.auth.signOut({ scope: "local" });
         return;
       }
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       console.error("AuthContext: Unexpected logout error:", err);
 
-      // Even if there's an error, try to clear local session
+      // Dù lỗi gì cũng cố gắng xóa session cục bộ
       try {
         await supabase.auth.signOut({ scope: "local" });
       } catch (localError) {
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     let mounted = true;
 
-    // Set up auth state listener FIRST
+    // Đăng ký listener trạng thái auth NGAY TỪ ĐẦU
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -122,21 +122,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         newSession?.user?.email || "No session"
       );
 
-      // Handle sign out events
+      // Xử lý sự kiện đăng xuất
       if (event === "SIGNED_OUT") {
         clearAuthState();
         setLoading(false);
         return;
       }
 
-      // Handle sign in events
+      // Xử lý sự kiện đăng nhập / làm mới token
       if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
         updateAuthState(newSession);
         setLoading(false);
         return;
       }
 
-      // For other events, update state if there's an actual change
+      // Với sự kiện khác, chỉ cập nhật khi token thay đổi thật
       if (session?.access_token !== newSession?.access_token) {
         updateAuthState(newSession);
         if (loading) setLoading(false);
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         console.log("AuthContext: Initializing auth...");
 
-        // Get initial session
+        // Lấy session ban đầu
         const {
           data: { session: initialSession },
           error: sessionError,
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             sessionError
           );
 
-          // If the session is invalid, clear local state
+          // Nếu session không hợp lệ thì xóa trạng thái cục bộ
           if (
             sessionError.message.includes("session_not_found") ||
             sessionError.message.includes("Session not found")

@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the hash parameters from URL
+        // Lấy tham số hash từ URL
         const hashParams = new URLSearchParams(
           window.location.hash.substring(1)
         );
@@ -31,7 +31,7 @@ export default function AuthCallbackPage() {
           throw new Error("No access token found in URL");
         }
 
-        // Set the session with the tokens from URL
+        // Thiết lập session bằng token từ URL
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken || "",
@@ -41,7 +41,7 @@ export default function AuthCallbackPage() {
 
         setStatus("success");
 
-        // Show success message based on type
+        // Hiện thông báo thành công tùy loại
         if (type === "signup") {
           toast({
             title: "Email confirmed!",
@@ -56,7 +56,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        // Redirect to dashboard
+        // Chuyển hướng sang dashboard
         setTimeout(() => router.replace("/dashboard"), 1500);
       } catch (error) {
         console.error("AuthCallback error:", error);
@@ -69,7 +69,7 @@ export default function AuthCallbackPage() {
           variant: "destructive",
         });
 
-        // Redirect to auth page after error
+        // Chuyển về trang đăng nhập nếu lỗi
         setTimeout(() => router.replace("/auth"), 3000);
       }
     };

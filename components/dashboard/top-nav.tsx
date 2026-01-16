@@ -38,7 +38,7 @@ export function TopNav() {
   const [mounted, setMounted] = useState(false);
   const supabase = createClient();
 
-  // Prevent hydration mismatch
+  // Tránh lỗi hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -58,7 +58,7 @@ export function TopNav() {
     .toUpperCase()
     .slice(0, 2);
 
-  // Load user avatar
+  // Tải avatar người dùng
   useEffect(() => {
     const loadUserAvatar = async () => {
       if (!user?.id) return;
@@ -94,9 +94,9 @@ export function TopNav() {
           </span>
         </Link>
 
-        {/* Right side */}
+        {/* Cụm nút bên phải */}
         <div className="flex items-center gap-1">
-          {/* Theme toggle */}
+          {/* Nút đổi theme */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant="ghost"
@@ -116,7 +116,7 @@ export function TopNav() {
             </Button>
           </motion.div>
 
-          {/* User menu */}
+          {/* Menu người dùng */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <motion.button
@@ -162,7 +162,7 @@ export function TopNav() {
         </div>
       </div>
 
-      {/* Logout confirmation dialog */}
+      {/* Dialog xác nhận đăng xuất */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

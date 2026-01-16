@@ -46,7 +46,7 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Transform notebooks to Project format
+  // Chuyển đổi dữ liệu notebook sang dạng Project
   const projects: Project[] = useMemo(() => {
     return (notebooks || []).map((nb) => ({
       id: nb.id,
@@ -57,42 +57,42 @@ export default function DashboardPage() {
     }));
   }, [notebooks]);
 
-  // Filter and sort projects
+  // Lọc và sắp xếp project
   const filteredProjects = useMemo(() => {
     let result = [...projects];
 
-    // Filter by search
+    // Lọc theo tìm kiếm
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter((p) => p.title.toLowerCase().includes(query));
     }
 
-    // Sort
+    // Sắp xếp
     result.sort((a, b) => {
       if (sortBy === "title") {
         return a.title.localeCompare(b.title);
       }
-      // Default: sort by date (newest first) - use original order from API
+      // Mặc định: theo ngày (mới nhất) - giữ thứ tự từ API
       return 0;
     });
 
     return result;
   }, [projects, searchQuery, sortBy]);
 
-  // Pagination
+  // Phân trang
   const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
   const paginatedProjects = filteredProjects.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Reset to page 1 when filter changes
+  // Đổi bộ lọc thì quay về trang 1
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   };
 
-  // Create new notebook
+  // Tạo notebook mới
   const handleCreateProject = async () => {
     if (!user) return;
 
@@ -124,7 +124,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Rename notebook
+  // Đổi tên notebook
   const handleRename = (id: string, newTitle: string) => {
     updateNotebook(
       { id, updates: { title: newTitle } },
@@ -146,12 +146,12 @@ export default function DashboardPage() {
     );
   };
 
-  // Delete notebook
+  // Xóa notebook
   const handleDelete = (id: string) => {
     deleteNotebook(id);
   };
 
-  // Show loading when auth is loading or when user is null (logging out)
+  // Hiển thị loading khi auth đang tải hoặc user null (đang đăng xuất)
   if (isLoading || authLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -181,7 +181,7 @@ export default function DashboardPage() {
           <EmptyState onCreateProject={handleCreateProject} />
         ) : (
           <div className="space-y-6 flex-1 flex flex-col">
-            {/* Search + Sort + Layout toggle row */}
+            {/* Hàng Search + Sắp xếp + Chọn layout */}
             <FadeIn>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
@@ -196,7 +196,7 @@ export default function DashboardPage() {
               </div>
             </FadeIn>
 
-            {/* Create button */}
+            {/* Nút tạo mới */}
             <FadeIn delay={0.1}>
               <Button
                 onClick={handleCreateProject}
@@ -212,7 +212,7 @@ export default function DashboardPage() {
               </Button>
             </FadeIn>
 
-            {/* Projects grid/list */}
+            {/* Lưới/danh sách project */}
             {filteredProjects.length === 0 ? (
               <div className="text-center py-16 flex-1">
                 <p className="text-muted-foreground">
@@ -252,10 +252,10 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* Spacer to push pagination to bottom */}
+                {/* Khoảng đệm để phân trang xuống cuối */}
                 <div className="flex-1" />
 
-                {/* Pagination */}
+                {/* Phân trang */}
                 {totalPages > 1 && (
                   <FadeIn delay={0.2}>
                     <Pagination className="mt-8 select-none">
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                           />
                         </PaginationItem>
 
-                        {/* Page numbers */}
+                        {/* Số trang */}
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                           (page) => {
                             const showPage =
@@ -342,7 +342,7 @@ export default function DashboardPage() {
   );
 }
 
-// Helper function
+// Hàm tiện ích
 function formatRelativeDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();

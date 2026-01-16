@@ -46,7 +46,7 @@ export const useNotebookGeneration = () => {
     onSuccess: (data, variables) => {
       console.log("Notebook content generated successfully:", data);
       
-      // Invalidate notebook queries to refresh UI
+      // Invalidate cache notebook để làm mới UI
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
       queryClient.invalidateQueries({ queryKey: ["notebook", variables.notebookId] });
       
@@ -59,7 +59,7 @@ export const useNotebookGeneration = () => {
     },
     onError: (error) => {
       console.error("Failed to generate notebook content:", error);
-      // Don't show error toast - this is optional functionality
+      // Không hiện toast lỗi vì đây là tính năng tùy chọn
     },
   });
 

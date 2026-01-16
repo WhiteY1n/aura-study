@@ -32,14 +32,14 @@ export function NoteListItem({ note, onClick, onDelete }: NoteListItemProps) {
     addSuffix: true,
   });
 
-  // Get preview text for the list item
+  // Lấy đoạn preview hiển thị
   const getPreviewText = () => {
     if (note.source_type === "ai_response") {
-      // Use extracted_text if available
+      // Ưu tiên extracted_text nếu có
       if (note.extracted_text) {
         return note.extracted_text;
       }
-      // Try to parse JSON content
+      // Thử parse nội dung JSON
       try {
         const parsed = JSON.parse(note.content);
         if (parsed.segments && parsed.segments[0]) {
@@ -49,10 +49,10 @@ export function NoteListItem({ note, onClick, onDelete }: NoteListItemProps) {
             .join(" ");
         }
       } catch {
-        // If parsing fails, use content as-is
+        // Nếu parse lỗi thì dùng nguyên bản
       }
     }
-    // For user notes or fallback
+    // Note do người dùng nhập hoặc mặc định
     return note.content.length > 100
       ? note.content.substring(0, 100) + "..."
       : note.content;

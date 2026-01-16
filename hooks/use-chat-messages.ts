@@ -6,7 +6,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
-// Types for chat messages
+// Kiểu dữ liệu cho tin nhắn chat
 export interface MessageSegment {
   text: string;
   citation_id?: number;
@@ -44,7 +44,7 @@ export interface EnhancedChatMessage {
   message: ChatMessageData;
 }
 
-// Type for the AI response structure from n8n
+// Kiểu dữ liệu phản hồi AI từ n8n
 interface N8nAiResponseContent {
   output: Array<{
     text: string;
@@ -78,7 +78,7 @@ const transformMessage = (
     "type" in messageObj &&
     "content" in messageObj
   ) {
-    // Check if this is an AI message with JSON content
+    // Kiểm tra tin nhắn AI có nội dung JSON hay không
     if (messageObj.type === "ai" && typeof messageObj.content === "string") {
       try {
         const parsedContent = JSON.parse(
@@ -197,7 +197,7 @@ export const useChatMessages = (notebookId?: string) => {
 
       if (error) throw error;
 
-      // Also fetch sources to get proper source titles
+      // Lấy thêm danh sách nguồn để có tiêu đề đúng
       const { data: sourcesData } = await supabase
         .from("sources")
         .select("id, title, type")
@@ -212,7 +212,7 @@ export const useChatMessages = (notebookId?: string) => {
     refetchOnReconnect: true,
   });
 
-  // Set up Realtime subscription for new messages
+  // Đăng ký Realtime cho tin nhắn mới
   useEffect(() => {
     if (!notebookId || !user) return;
 

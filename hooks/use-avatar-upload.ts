@@ -16,25 +16,25 @@ export const useAvatarUpload = () => {
     try {
       setIsUploading(true);
 
-      // Validate file type
+      // Kiểm tra đúng loại file
       if (!file.type.startsWith("image/")) {
         throw new Error("Please select an image file");
       }
 
-      // Validate file size (max 5MB)
+      // Kiểm tra dung lượng (tối đa 5MB)
       if (file.size > 5 * 1024 * 1024) {
         throw new Error("File size must be less than 5MB");
       }
 
-      // Get file extension
+      // Lấy phần mở rộng
       const fileExtension = file.name.split(".").pop() || "jpg";
 
-      // Create file path: avatars/{user_id}.{extension}
+      // Tạo đường dẫn: avatars/{user_id}.{extension}
       const filePath = `avatars/${userId}.${fileExtension}`;
 
       console.log("Uploading avatar to:", filePath);
 
-      // First, try to delete old avatar files for this user
+      // Thử xóa avatar cũ của người dùng trước
       try {
         const { data: files } = await supabase.storage
           .from("profiles")
@@ -43,7 +43,7 @@ export const useAvatarUpload = () => {
             offset: 0,
           });
 
-        // Delete all old avatar files for this user
+        // Xóa toàn bộ avatar cũ của user
         if (files) {
           const oldFiles = files.filter(
             (f) =>
@@ -58,10 +58,10 @@ export const useAvatarUpload = () => {
         }
       } catch (deleteError) {
         console.warn("Could not delete old avatar:", deleteError);
-        // Don't throw, continue with upload
+        // Không throw, tiếp tục upload
       }
 
-      // Upload file to Supabase storage
+      // Upload file lên storage Supabase
       const { data, error } = await supabase.storage
         .from("profiles")
         .upload(filePath, file, {
@@ -76,15 +76,15 @@ export const useAvatarUpload = () => {
 
       console.log("Avatar uploaded successfully:", data);
 
-      // Get public URL
+      // Lấy public URL
       const { data: urlData } = supabase.storage
         .from("profiles")
         .getPublicUrl(filePath);
 
-      // Add cache busting with timestamp
+      // Thêm timestamp để tránh cache
       const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
-      // Update user profile in database
+      // Cập nhật profile người dùng trong database
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: avatarUrl })

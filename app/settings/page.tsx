@@ -346,14 +346,14 @@ export default function SettingsPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Profile Card */}
+        {/* Thẻ hồ sơ */}
         <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>Manage your account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Avatar Upload */}
+            {/* Upload avatar */}
             <div className="space-y-2">
               <Label>Avatar</Label>
               <div className="flex items-end gap-4">
@@ -395,7 +395,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Avatar Preview Dialog */}
+              {/* Dialog xem trước avatar */}
               <Dialog
                 open={avatarPreviewOpen}
                 onOpenChange={setAvatarPreviewOpen}
@@ -486,7 +486,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Security Card */}
+        {/* Thẻ bảo mật */}
         <Card>
           <CardHeader>
             <CardTitle>Security</CardTitle>
@@ -625,7 +625,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Danger Zone Card */}
+        {/* Khu vực nguy hiểm */}
         <Card className="border-destructive/50">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>

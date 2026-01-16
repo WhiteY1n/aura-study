@@ -13,7 +13,7 @@ export const useAudioOverview = (notebookId?: string) => {
   const queryClient = useQueryClient();
   const supabase = createClient();
 
-  // Set up realtime subscription for notebook updates
+  // Đăng ký realtime cho cập nhật notebook
   useEffect(() => {
     if (!notebookId) return;
 
@@ -47,7 +47,7 @@ export const useAudioOverview = (notebookId?: string) => {
                 description: "Your deep dive conversation is ready to play!",
               });
 
-              // Invalidate queries to refresh the UI
+              // Invalidate query để làm mới UI
               queryClient.invalidateQueries({ queryKey: ["notebooks"] });
             } else if (newData.audio_overview_generation_status === "failed") {
               setIsGenerating(false);
@@ -133,7 +133,7 @@ export const useAudioOverview = (notebookId?: string) => {
     },
     onSuccess: (data, variables) => {
       console.log("Audio URL refreshed successfully:", data);
-      // Invalidate queries to refresh the UI with new URL
+      // Invalidate query để cập nhật URL mới trên UI
       queryClient.invalidateQueries({ queryKey: ["notebooks"] });
 
       if (!variables.silent) {

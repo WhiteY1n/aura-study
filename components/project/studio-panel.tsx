@@ -35,7 +35,7 @@ interface StudioPanelProps {
   onCitationClick?: (citation: Citation) => void;
 }
 
-// Desktop panel content - also exported for MobileTabs
+// Nội dung panel desktop - dùng chung cho MobileTabs
 export function StudioContent({
   projectId,
   notebookId,
@@ -66,11 +66,11 @@ export function StudioContent({
   const currentStatus =
     generationStatus || notebook?.audio_overview_generation_status;
 
-  // Check if at least one source has been successfully processed
+  // Kiểm tra có ít nhất một nguồn đã xử lý xong
   const hasProcessedSource =
     sources?.some((source) => source.processing_status === "completed") || false;
 
-  // Auto-refresh expired URLs
+  // Tự làm mới URL đã hết hạn
   useEffect(() => {
     if (!notebookId || !notebook?.audio_overview_url) return;
 
@@ -84,10 +84,10 @@ export function StudioContent({
       }
     };
 
-    // Check immediately
+    // Kiểm tra ngay lập tức
     checkAndRefresh();
 
-    // Set up periodic check every 5 minutes
+    // Đặt lịch kiểm tra mỗi 5 phút
     const interval = setInterval(checkAndRefresh, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
@@ -119,7 +119,7 @@ export function StudioContent({
   };
 
   const handleNoteSaved = () => {
-    // Refresh notes list
+    // Làm tươi danh sách ghi chú
     queryClient.invalidateQueries({
       queryKey: ["notes", notebookId],
     });
@@ -171,7 +171,7 @@ export function StudioContent({
     return null;
   };
 
-  // Show manual note editor
+  // Hiển thị editor nhập tay
   if (showManualEditor) {
     return (
       <ManualNoteEditor
@@ -182,7 +182,7 @@ export function StudioContent({
     );
   }
 
-  // Show note viewer if a note is selected
+  // Hiển thị chi tiết note khi đã chọn
   if (selectedNote) {
     return (
       <NoteViewer
@@ -209,7 +209,7 @@ export function StudioContent({
             <h3 className="font-medium text-foreground">Audio Overview</h3>
           </div>
 
-          {/* Show AudioPlayer when audio is ready */}
+          {/* Hiện AudioPlayer khi audio đã sẵn sàng */}
           {hasValidAudio && !audioError && currentStatus !== "generating" && !isAutoRefreshing && notebook?.audio_overview_url ? (
             <AudioPlayer
               audioUrl={notebook.audio_overview_url}
@@ -226,7 +226,7 @@ export function StudioContent({
             />
           ) : (
             <Card className="p-3 border border-border">
-              {/* Hide icon section when generating or auto-refreshing */}
+              {/* Ẩn phần icon khi đang tạo hoặc auto-refresh */}
               {currentStatus !== "generating" &&
                 !isGenerating &&
                 !isAutoRefreshing && (
@@ -251,7 +251,7 @@ export function StudioContent({
                   </div>
                 )}
 
-              {/* Status Display */}
+              {/* Hiển thị trạng thái */}
               {getStatusDisplay() && (
                 <div className="flex items-center space-x-2 mb-3 p-2 rounded-md bg-muted/50">
                   {getStatusDisplay()!.icon}
@@ -266,7 +266,7 @@ export function StudioContent({
                 </div>
               )}
 
-              {/* Audio error div */}
+              {/* Vùng lỗi audio */}
               {audioError && (
                 <div className="flex items-center space-x-2 mb-3 p-2 bg-red-50 dark:bg-red-950/20 rounded-md">
                   <AlertCircle className="h-4 w-4 text-red-600" />
@@ -310,7 +310,7 @@ export function StudioContent({
                 </Button>
               </div>
 
-              {/* Help text when no processed sources */}
+              {/* Hướng dẫn khi chưa có nguồn đã xử lý */}
               {!hasProcessedSource && (
                 <p className="text-xs text-muted-foreground mt-2 text-center">
                   Add and process a source first to generate audio
@@ -322,7 +322,7 @@ export function StudioContent({
 
         <Separator />
 
-        {/* Notes Section */}
+        {/* Khu vực ghi chú */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">
@@ -340,9 +340,9 @@ export function StudioContent({
           </div>
           {notes && notes.length === 0 ? (
             <div className="text-center py-6 px-2">
-              <p className="text-xs text-muted-foreground">No notes yet.</p>
+              <p className="text-xs text-muted-foreground">Chưa có ghi chú.</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Save responses from chat to create notes
+                Lưu câu trả lời từ chat để tạo ghi chú
               </p>
             </div>
           ) : (
@@ -363,7 +363,7 @@ export function StudioContent({
   );
 }
 
-// Desktop version
+// Phiên bản desktop
 export function StudioPanel(props: StudioPanelProps) {
   return (
     <aside className="hidden lg:block w-80 xl:w-96 bg-background border-l border-border/50 flex-shrink-0">
@@ -372,7 +372,7 @@ export function StudioPanel(props: StudioPanelProps) {
   );
 }
 
-// Mobile bottom sheet version
+// Phiên bản bottom sheet cho mobile
 export function StudioSheet(props: StudioPanelProps) {
   const [open, setOpen] = useState(false);
 

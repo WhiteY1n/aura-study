@@ -76,7 +76,7 @@ export function AddSourceDialog({
     setIsUploading(true);
 
     try {
-      // Process each file sequentially
+      // Xử lý từng file tuần tự
       for (const file of files) {
         const fileType = file.type.includes("pdf")
           ? "pdf"
@@ -84,7 +84,7 @@ export function AddSourceDialog({
             ? "audio"
             : "text";
 
-        // Step 1: Create source record in database with "uploading" status
+        // Bước 1: Tạo bản ghi nguồn trong DB với trạng thái "uploading"
         const sourceData = {
           notebookId: projectId,
           title: file.name,
@@ -103,11 +103,11 @@ export function AddSourceDialog({
           throw new Error("Failed to create source record");
         }
 
-        // Step 2: Upload file to Supabase Storage
+        // Bước 2: Upload file lên Supabase Storage
         const filePath = await uploadFile(file, projectId, createdSource.id);
         
         if (!filePath) {
-          // Update source status to failed
+          // Cập nhật trạng thái nguồn sang failed
           await updateSource({
             id: createdSource.id,
             updates: { processing_status: "failed" },
@@ -115,7 +115,7 @@ export function AddSourceDialog({
           throw new Error(`Failed to upload file: ${file.name}`);
         }
 
-        // Step 3: Update source with file_path and set status to "processing"
+        // Bước 3: Cập nhật file_path và chuyển trạng thái sang "processing"
         await updateSource({
           id: createdSource.id,
           updates: {
@@ -124,7 +124,7 @@ export function AddSourceDialog({
           },
         });
 
-        // Step 4: Trigger document processing via Edge Function
+        // Bước 4: Gọi Edge Function để xử lý tài liệu
         try {
           await processDocumentAsync({
             sourceId: createdSource.id,
@@ -133,15 +133,15 @@ export function AddSourceDialog({
           });
         } catch (processError) {
           console.error("Document processing failed:", processError);
-          // Don't throw - the file is uploaded, processing can be retried
+          // Không throw vì file đã upload, có thể xử lý lại sau
           await updateSource({
             id: createdSource.id,
             updates: { processing_status: "pending" },
           });
         }
 
-        // Step 5: Generate notebook content (title, description, questions) - only for first file
-        // Run in background, don't wait for it
+        // Bước 5: Sinh nội dung notebook (tiêu đề, mô tả, câu hỏi) - chỉ cho file đầu
+        // Chạy nền, không cần chờ
         if (files.indexOf(file) === 0) {
           generateNotebookContentAsync({
             notebookId: projectId,
@@ -149,10 +149,10 @@ export function AddSourceDialog({
             sourceType: fileType,
           }).catch(async (genError) => {
             console.error("Notebook content generation failed:", genError);
-            // Fallback: Update notebook with simple title from filename
+            // Phương án dự phòng: cập nhật tiêu đề đơn giản từ tên file
             try {
               const supabase = (await import("@/lib/supabase/client")).createClient();
-              const simpleName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+              const simpleName = file.name.replace(/\.[^/.]+$/, ""); // Bỏ phần mở rộng tên file
               const icon = fileType === "pdf" ? "📄" : fileType === "audio" ? "🎵" : "📝";
               
               await supabase
@@ -172,7 +172,7 @@ export function AddSourceDialog({
         }
       }
 
-      // Close dialog immediately after upload completes
+      // Đóng dialog ngay sau khi tải lên xong
       setIsUploading(false);
       onOpenChange(false);
 
@@ -181,7 +181,7 @@ export function AddSourceDialog({
         fileInputRef.current.value = "";
       }
 
-      // Trigger refetch
+      // Kích hoạt refetch dữ liệu
       onSourceAdded?.();
 
       toast({
@@ -203,7 +203,7 @@ export function AddSourceDialog({
 
   return (
     <>
-      {/* Hidden file input */}
+      {/* Input file ẩn */}
       <input
         ref={fileInputRef}
         type="file"
@@ -228,7 +228,7 @@ export function AddSourceDialog({
           </DialogHeader>
 
           <div className="space-y-3 py-4">
-            {/* Upload Sources - Large top section */}
+            {/* Tải lên nguồn - khu vực lớn phía trên */}
             <button
               onClick={() => handleOptionClick("upload")}
               disabled={isUploading}
@@ -259,7 +259,7 @@ export function AddSourceDialog({
               </div>
             </button>
 
-            {/* Bottom row - Link and Paste Text */}
+            {/* Hàng dưới - Link và Dán văn bản */}
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleOptionClick("website")}
@@ -311,7 +311,7 @@ export function AddSourceDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Sub dialogs for website and paste */}
+      {/* Các dialog phụ cho Website và Dán nội dung */}
       <AddWebsiteDialog
         open={activeDialog === "website"}
         onOpenChange={(open) => !open && handleSubDialogClose()}
@@ -329,7 +329,7 @@ export function AddSourceDialog({
   );
 }
 
-// Helper function to extract domain from URL
+// Hàm phụ để lấy domain từ URL
 function extractDomain(url: string): string {
   try {
     const urlObj = new URL(url);
@@ -339,7 +339,7 @@ function extractDomain(url: string): string {
   }
 }
 
-// Website Dialog Component
+// Dialog thêm Website
 function AddWebsiteDialog({
   open,
   onOpenChange,
@@ -357,7 +357,7 @@ function AddWebsiteDialog({
   const { addSourceAsync } = useSources(projectId);
   const queryClient = useQueryClient();
 
-  // Parse URLs from textarea
+  // Tách và kiểm tra danh sách URL từ ô nhập
   const validUrls = textareaValue
     .split("\n")
     .map((line) => line.trim())
@@ -379,10 +379,10 @@ function AddWebsiteDialog({
     try {
       const supabase = (await import("@/lib/supabase/client")).createClient();
       
-      // Debug: Log URLs
+      // Debug: log danh sách URL
       console.log("Valid URLs:", validUrls);
       
-      // Create sources for each URL
+      // Tạo nguồn cho từng URL
       const createdSources = [];
       for (let i = 0; i < validUrls.length; i++) {
         const url = validUrls[i];
@@ -404,7 +404,7 @@ function AddWebsiteDialog({
         createdSources.push(source);
       }
 
-      // Call process-additional-sources edge function - let n8n update the title
+      // Gọi edge function process-additional-sources - để n8n cập nhật tiêu đề
       if (createdSources.length > 0) {
         console.log('Calling process-additional-sources edge function...');
         try {
@@ -504,7 +504,7 @@ function AddWebsiteDialog({
   );
 }
 
-// Copied Text Dialog Component
+// Dialog thêm nội dung dán
 function AddCopiedTextDialog({
   open,
   onOpenChange,
@@ -535,7 +535,7 @@ function AddCopiedTextDialog({
       
       console.log("Creating text source:", sourceTitle);
       
-      // Create source record
+      // Tạo bản ghi nguồn
       const createdSource = await addSourceAsync({
         notebookId: projectId,
         title: sourceTitle,
@@ -550,7 +550,7 @@ function AddCopiedTextDialog({
 
       console.log("Source created:", createdSource?.id);
 
-      // Call process-additional-sources edge function - let n8n update the title
+      // Gọi edge function process-additional-sources - để n8n cập nhật tiêu đề
       try {
         const { data: webhookData, error: webhookError } = await supabase.functions.invoke(
           "process-additional-sources",

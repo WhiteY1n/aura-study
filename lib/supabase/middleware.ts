@@ -29,15 +29,14 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: Do not write any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // LƯU Ý: Không viết logic nào giữa createServerClient và supabase.auth.getUser().
+  // Một sai sót nhỏ có thể khiến người dùng bị đăng xuất ngẫu nhiên rất khó debug.
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes - redirect to /auth if not logged in
+  // Các route cần bảo vệ - chuyển về /auth nếu chưa đăng nhập
   const protectedPaths = ["/dashboard", "/project", "/settings"];
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
@@ -49,20 +48,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect logged-in users away from auth page
+  // Người đã đăng nhập thì không cho vào trang /auth
   if (request.nextUrl.pathname === "/auth" && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // Redirect root to dashboard
+  // Nếu vào / thì chuyển về dashboard
   if (request.nextUrl.pathname === "/" && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  // QUAN TRỌNG: phải return nguyên supabaseResponse.
   return supabaseResponse;
 }

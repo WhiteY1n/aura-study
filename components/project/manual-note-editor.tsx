@@ -75,12 +75,12 @@ export function ManualNoteEditor({
       setTitle("");
       setContent("");
 
-      // Call onSave callback if provided
+      // Gọi callback onSave nếu có
       if (onSave) {
         onSave();
       }
 
-      // Go back to list
+      // Quay lại danh sách
       onBack();
     } catch (error) {
       console.error("Error saving note:", error);
@@ -130,7 +130,7 @@ export function ManualNoteEditor({
         </Button>
       </div>
 
-      {/* Content */}
+      {/* Nội dung */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div className="space-y-2">
           <Label htmlFor="note-title">Title</Label>

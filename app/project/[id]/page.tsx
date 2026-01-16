@@ -388,9 +388,9 @@ export default function ProjectView() {
         </div>
       </header>
 
-      {/* Main Content - Desktop */}
+      {/* Nội dung chính - Desktop */}
       <div className="flex-1 hidden lg:flex overflow-hidden">
-        {/* Sources Panel (Left) */}
+        {/* Panel nguồn (trái) */}
         <div className="flex h-full">
           <SourcePanel
             sources={sources}
@@ -406,19 +406,19 @@ export default function ProjectView() {
           />
         </div>
 
-        {/* Chat Panel (Center) */}
+        {/* Panel chat (giữa) */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {!isLoading && !hasSources ? (
-            /* Empty State inside Chat area */
+            /* Trạng thái trống trong khu vực Chat */
             <div className="flex flex-col h-full">
-              {/* Chat Header */}
+              {/* Header Chat */}
               <div className="flex-shrink-0 flex items-center justify-end px-6 py-4 border-b border-border/50">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <span className="text-sm font-medium">Chat</span>
                 </div>
               </div>
 
-              {/* Empty State Content */}
+              {/* Nội dung khi trống */}
               <div className="flex-1 flex items-center justify-center p-8">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -471,7 +471,7 @@ export default function ProjectView() {
           )}
         </div>
 
-        {/* Studio Panel (Right) */}
+        {/* Panel Studio (phải) */}
         <StudioPanel
           projectId={id || ""}
           notebookId={id}
@@ -479,7 +479,7 @@ export default function ProjectView() {
         />
       </div>
 
-      {/* Main Content - Mobile (Tabs) */}
+      {/* Nội dung chính - Mobile (Tabs) */}
       <div className="flex-1 flex flex-col lg:hidden overflow-hidden">
         <MobileTabs
           sources={sources}
@@ -555,7 +555,7 @@ export default function ProjectView() {
         />
       </div>
 
-      {/* Add Source Dialog */}
+      {/* Dialog thêm nguồn */}
       <AddSourceDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
@@ -563,7 +563,7 @@ export default function ProjectView() {
         onSourceAdded={handleSourceAdded}
       />
 
-      {/* Logout confirmation dialog */}
+      {/* Dialog xác nhận đăng xuất */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

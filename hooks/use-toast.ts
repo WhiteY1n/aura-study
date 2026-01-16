@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 
-// Re-export sonner's toast for easier migration from shadcn toast
+// Re-export toast của sonner để dễ chuyển đổi từ shadcn toast
 export function useToast() {
   return {
     toast: (props: {
@@ -11,7 +11,7 @@ export function useToast() {
       variant?: "default" | "destructive";
       duration?: number;
     }) => {
-      const duration = props.duration ?? 2000; // Default 2 seconds (faster)
+      const duration = props.duration ?? 2000; // Mặc định 2 giây (nhanh hơn)
       
       if (props.variant === "destructive") {
         toast.error(props.title, {

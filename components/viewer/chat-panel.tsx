@@ -71,7 +71,7 @@ export function ChatPanel({
   const latestMessageRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll when messages update or when typing
+  // Tự cuộn khi có tin nhắn mới hoặc đang gõ
   useEffect(() => {
     if (latestMessageRef.current && scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector(
@@ -90,7 +90,7 @@ export function ChatPanel({
 
   return (
     <div className="flex flex-col h-full min-w-0 border-l border-border/60 dark:border-border/40 shadow-inner overflow-hidden">
-      {/* Header with Clear Chat button */}
+      {/* Header cùng nút xóa hội thoại */}
       <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border/50">
         <div className="flex items-center gap-2 text-muted-foreground">
           <MessageSquare className="h-4 w-4" />
@@ -139,10 +139,10 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Messages Area - Scrollable with ScrollArea */}
+      {/* Vùng tin nhắn - cuộn được với ScrollArea */}
       <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
         <div className="px-6 py-4 max-w-4xl mx-auto">
-          {/* Document Summary Section */}
+          {/* Phần tóm tắt tài liệu */}
           {notebook && (
             <div className="mb-8 pb-6 border-b border-border/50">
               <div className="flex items-center gap-4 mb-4">
@@ -193,7 +193,7 @@ export function ChatPanel({
             </div>
           )}
 
-          {/* Chat Messages or Empty State */}
+          {/* Tin nhắn hoặc trạng thái trống */}
           {messages.length === 0 && !pendingUserMessage && !showAiLoading ? (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -221,7 +221,7 @@ export function ChatPanel({
                   notebookId={notebookId}
                 />
               ))}
-              {/* Pending user message */}
+              {/* Tin nhắn người dùng đang chờ */}
               {pendingUserMessage && (
                 <div className="flex justify-end">
                   <Card className="max-w-xs lg:max-w-md rounded-lg shadow-sm bg-primary text-primary-foreground">
@@ -236,7 +236,7 @@ export function ChatPanel({
                   </Card>
                 </div>
               )}
-              {/* AI Loading Indicator */}
+              {/* Hiển thị đang xử lý của AI */}
               {showAiLoading && (
                 <div className="flex justify-start">
                   <div className="flex items-center gap-1.5 px-4 py-3 bg-muted rounded-lg">
@@ -270,14 +270,14 @@ export function ChatPanel({
                   </div>
                 </div>
               )}
-              {/* Scroll target */}
+              {/* Mốc cuộn xuống cuối */}
               <div ref={latestMessageRef} />
             </div>
           )}
         </div>
       </ScrollArea>
 
-      {/* Input - Fixed at bottom */}
+      {/* Ô nhập - cố định phía dưới */}
       <div className="flex-shrink-0 bg-background border-t border-border/60 dark:border-border/40">
         <ChatInput
           onSend={onSendMessage}
@@ -388,7 +388,7 @@ function ChatMessageWithSave({
           />
         </div>
 
-        {/* Actions */}
+        {/* Hành động trên tin nhắn AI */}
         <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button
             variant="ghost"

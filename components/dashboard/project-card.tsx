@@ -198,21 +198,21 @@ export function ProjectCard({
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
           <Card className="group relative overflow-hidden h-48 select-none hover:bg-muted/50 transition-colors cursor-pointer">
-            {/* Content */}
+            {/* Nội dung thẻ */}
             <div className="p-4 h-full flex flex-col">
-              {/* Icon */}
+              {/* Biểu tượng */}
               <div className="mb-4">
                 <span className="text-3xl leading-none">
                   {project.icon || "📝"}
                 </span>
               </div>
 
-              {/* Title */}
+              {/* Tiêu đề */}
               <h3 className="text-xl font-normal text-foreground line-clamp-2 flex-grow mb-2">
                 {project.title}
               </h3>
 
-              {/* Footer */}
+              {/* Chân thẻ */}
               <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto">
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />

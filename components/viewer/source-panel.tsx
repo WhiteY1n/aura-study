@@ -133,7 +133,7 @@ export function SourcePanel({
 
   const { deleteSource, isDeleting } = useSourceDelete();
 
-  // Sync with parent prop
+  // Đồng bộ với prop từ component cha
   const activeSourceForViewing =
     propSelectedSourceForViewing !== undefined
       ? propSelectedSourceForViewing
@@ -236,7 +236,7 @@ export function SourcePanel({
           />
         )}
 
-        {/* Show source content viewer if a source is selected for viewing */}
+        {/* Hiển thị nội dung nguồn khi đang chọn để xem */}
         {activeSourceForViewing ? (
           <SourceContentViewer
             sourceContent={activeSourceForViewing.content || "No content available for this source yet. The content will appear here once the source has been processed."}
@@ -249,7 +249,7 @@ export function SourcePanel({
           />
         ) : (
           <>
-            {/* Header with Collapse Button */}
+            {/* Header kèm nút thu gọn */}
             <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border/50">
               {!isCollapsed && (
                 <motion.div
@@ -277,7 +277,7 @@ export function SourcePanel({
               </Button>
             </div>
 
-            {/* Content */}
+            {/* Nội dung danh sách nguồn */}
             {!isCollapsed ? (
               <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
                 <div className="p-4 space-y-2">
@@ -323,14 +323,14 @@ export function SourcePanel({
                             {source.title}
                           </span>
 
-                          {/* Processing Status Icon */}
+                          {/* Biểu tượng trạng thái xử lý */}
                           {source.processing_status && (
                             <div className="shrink-0">
                               {renderProcessingStatus(source.processing_status)}
                             </div>
                           )}
 
-                          {/* More Actions Menu */}
+                          {/* Menu hành động thêm */}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -372,7 +372,7 @@ export function SourcePanel({
                     ))}
                   </AnimatePresence>
 
-                  {/* Add Source Button */}
+                  {/* Nút thêm nguồn */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -426,7 +426,7 @@ export function SourcePanel({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Rename Source Dialog */}
+      {/* Dialog đổi tên nguồn */}
       <RenameSourceDialog
         source={
           renameSource

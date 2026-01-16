@@ -77,7 +77,7 @@ export function MobileTabs({
   const [selectedForViewing, setSelectedForViewing] = useState<Source | null>(null);
   const [deleteSourceId, setDeleteSourceId] = useState<string | null>(null);
 
-  // Auto-open source viewer when citation is clicked
+  // Tự mở phần xem nguồn khi người dùng bấm vào trích dẫn
   useEffect(() => {
     if (highlightedCitation && activeTab !== "sources") {
       const source = sources.find(s => s.id === highlightedCitation.source_id);
@@ -88,7 +88,7 @@ export function MobileTabs({
     }
   }, [highlightedCitation?.clickedAt]);
 
-  // Update selected source for viewing when highlightedCitation changes and we're already on sources tab
+  // Cập nhật nguồn đang xem khi highlightedCitation đổi và đang ở tab nguồn
   useEffect(() => {
     if (highlightedCitation && activeTab === "sources") {
       const source = sources.find(s => s.id === highlightedCitation.source_id);
@@ -113,7 +113,7 @@ export function MobileTabs({
   return (
     <>
       <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as "sources" | "chat" | "studio")} className="flex flex-col h-full">
-        {/* Tab bar at top */}
+        {/* Thanh tab phía trên */}
         <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-background h-12 p-0 shrink-0">
           <TabsTrigger 
             value="sources" 
@@ -138,7 +138,7 @@ export function MobileTabs({
           </TabsTrigger>
         </TabsList>
 
-        {/* Sources Tab */}
+        {/* Tab Nguồn */}
         <TabsContent value="sources" className="flex-1 m-0 overflow-hidden">
           {selectedForViewing ? (
             <SourceContentViewer
@@ -229,12 +229,12 @@ export function MobileTabs({
           )}
         </TabsContent>
 
-        {/* Chat Tab */}
+        {/* Tab Chat */}
         <TabsContent value="chat" className="flex-1 m-0 overflow-hidden">
           {chatContent}
         </TabsContent>
 
-        {/* Studio Tab */}
+        {/* Tab Studio */}
         <TabsContent value="studio" className="flex-1 m-0 overflow-hidden">
           {studioContent}
         </TabsContent>
@@ -247,7 +247,7 @@ export function MobileTabs({
         onSourceAdded={onSourceAdded}
       />
 
-      {/* Delete confirmation dialog */}
+      {/* Hộp thoại xác nhận xóa nguồn */}
       <AlertDialog
         open={deleteSourceId !== null}
         onOpenChange={(open) => !open && setDeleteSourceId(null)}

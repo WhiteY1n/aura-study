@@ -60,7 +60,7 @@ export function AudioPlayer({
   const { toast } = useToast();
   const supabase = createClient();
 
-  // Check if audio is expired
+  // Kiểm tra URL audio đã hết hạn chưa
   const isExpired = expiresAt ? new Date(expiresAt) <= new Date() : false;
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export function AudioPlayer({
       setLoading(false);
       setIsPlaying(false);
 
-      // If the URL has expired and we have a notebookId, try to refresh it automatically
+      // Nếu URL hết hạn và có notebookId thì thử làm mới tự động
       if (
         (isExpired ||
           audioError?.includes("403") ||
@@ -100,11 +100,11 @@ export function AudioPlayer({
       }
 
       if (retryCount < 2 && !autoRetryInProgress) {
-        // Auto-retry up to 2 times for transient errors
+        // Tự retry tối đa 2 lần cho lỗi tạm thời
         setTimeout(() => {
           setRetryCount((prev) => prev + 1);
           audio.load();
-        }, 1000 * (retryCount + 1)); // Exponential backoff
+        }, 1000 * (retryCount + 1)); // Lùi thời gian theo cấp số nhân
       } else {
         setAudioError("Failed to load audio");
         setAutoRetryInProgress(false);
@@ -150,7 +150,7 @@ export function AudioPlayer({
     autoRetryInProgress,
   ]);
 
-  // Reload audio when URL changes (for automatic refresh)
+  // Tải lại audio khi URL đổi (phục vụ tự refresh)
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && autoRetryInProgress) {
@@ -224,26 +224,26 @@ export function AudioPlayer({
     setIsDownloading(true);
 
     try {
-      // Fetch the audio file
+      // Tải file audio
       const response = await fetch(audioUrl);
       if (!response.ok) {
         throw new Error("Failed to fetch audio file");
       }
 
-      // Create a blob from the response
+      // Tạo blob từ phản hồi
       const blob = await response.blob();
 
-      // Create a temporary URL for the blob
+      // Tạo URL tạm cho blob
       const blobUrl = URL.createObjectURL(blob);
 
-      // Create a temporary anchor element and trigger download
+      // Tạo thẻ a tạm và kích hoạt tải về
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = `${title}.mp3`;
       document.body.appendChild(link);
       link.click();
 
-      // Clean up
+      // Dọn dẹp
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
 
@@ -276,11 +276,11 @@ export function AudioPlayer({
     setIsDeleting(true);
 
     try {
-      // First, try to remove all files in the notebook folder from storage
+      // Thử xóa toàn bộ file trong thư mục notebook ở storage
       try {
         console.log("Attempting to list files in folder:", notebookId);
 
-        // List all files in the notebook folder
+        // Liệt kê file trong thư mục notebook
         const { data: files, error: listError } = await supabase.storage
           .from("audio")
           .list(notebookId);
@@ -288,7 +288,7 @@ export function AudioPlayer({
         if (listError) {
           console.error("Error listing files:", listError);
         } else if (files && files.length > 0) {
-          // Delete all files in the folder
+          // Xóa tất cả file trong thư mục
           const filePaths = files.map((file) => `${notebookId}/${file.name}`);
           console.log("Deleting files:", filePaths);
 
@@ -304,10 +304,10 @@ export function AudioPlayer({
         }
       } catch (storageError) {
         console.error("Storage operation failed:", storageError);
-        // Continue with database update even if storage deletion fails
+        // Vẫn cập nhật DB dù xóa file storage thất bại
       }
 
-      // Update the notebook to clear audio overview fields
+      // Cập nhật notebook để xóa thông tin audio overview
       const { error } = await supabase
         .from("notebooks")
         .update({
@@ -328,7 +328,7 @@ export function AudioPlayer({
           "The audio overview and associated files have been successfully deleted.",
       });
 
-      // Call the onDeleted callback to update parent component
+      // Gọi callback onDeleted để cập nhật component cha
       onDeleted?.();
     } catch (error) {
       console.error("Failed to delete audio:", error);
@@ -382,7 +382,7 @@ export function AudioPlayer({
         </DropdownMenu>
       </div>
 
-      {/* Auto-refresh indicator */}
+      {/* Trạng thái tự làm mới URL */}
       {autoRetryInProgress && (
         <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
           <div className="flex items-center space-x-2">
@@ -394,7 +394,7 @@ export function AudioPlayer({
         </div>
       )}
 
-      {/* Error State */}
+      {/* Trạng thái lỗi phát audio */}
       {audioError && !autoRetryInProgress && (
         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800">
           <div className="flex items-center space-x-2">
@@ -415,7 +415,7 @@ export function AudioPlayer({
         </div>
       )}
 
-      {/* Progress Bar */}
+      {/* Thanh tiến trình */}
       <div className="space-y-2">
         <Slider
           value={[currentTime]}
@@ -431,7 +431,7 @@ export function AudioPlayer({
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Điều khiển phát */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Button
@@ -460,7 +460,7 @@ export function AudioPlayer({
           </Button>
         </div>
 
-        {/* Volume Control */}
+        {/* Điều chỉnh âm lượng */}
         <div className="flex items-center space-x-2 w-24">
           <Volume2 className="h-4 w-4 text-muted-foreground" />
           <Slider

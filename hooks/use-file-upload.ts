@@ -17,10 +17,10 @@ export const useFileUpload = () => {
     try {
       setIsUploading(true);
 
-      // Get file extension
+      // Lấy phần mở rộng file
       const fileExtension = file.name.split(".").pop() || "bin";
 
-      // Create file path: {notebook_id}/{source_id}.{extension}
+      // Tạo đường dẫn: {notebook_id}/{source_id}.{extension}
       const filePath = `${notebookId}/${sourceId}.${fileExtension}`;
 
       console.log("Uploading file to sources bucket:", filePath);
@@ -30,18 +30,18 @@ export const useFileUpload = () => {
         size: file.size,
       });
 
-      // Upload file to Supabase storage - bucket "sources"
+      // Upload file lên bucket "sources" của Supabase
       const { data, error } = await supabase.storage
         .from("sources")
         .upload(filePath, file, {
           cacheControl: "3600",
-          upsert: true, // Allow overwriting in case of retry
+          upsert: true, // Cho phép ghi đè khi retry
         });
 
       if (error) {
         console.error("Upload error details:", error);
         
-        // Provide more specific error messages
+        // Bổ sung thông báo lỗi cụ thể hơn
         if (error.message?.includes("Bucket not found")) {
           throw new Error("Storage bucket 'sources' not found. Please contact support.");
         } else if (error.message?.includes("Policy")) {
