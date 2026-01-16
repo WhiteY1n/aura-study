@@ -78,28 +78,14 @@ export function SourceSheet({
     if (highlightedCitation) {
       const source = sources?.find((s) => s.id === highlightedCitation.source_id);
       if (source) {
-        setSelectedForViewing({
-          id: source.id,
-          title: source.title,
-          type: source.type,
-          content: source.content ?? null,
-          summary: source.summary ?? null,
-          url: source.url ?? null,
-        });
+        setSelectedForViewing(source);
         setOpen(true);
       }
     }
   }, [highlightedCitation, sources]);
 
   const handleSourceClick = (source: Source) => {
-    setSelectedForViewing({
-      id: source.id,
-      title: source.title,
-      type: source.type,
-      content: source.content ?? null,
-      summary: source.summary ?? null,
-      url: source.url ?? null,
-    });
+    setSelectedForViewing(source);
     onSourceClick?.(source);
   };
 
@@ -155,8 +141,8 @@ export function SourceSheet({
             <SourceContentViewer
               sourceTitle={selectedForViewing.title}
               sourceContent={selectedForViewing.content || "No content available for this source yet. The content will appear here once the source has been processed."}
-              sourceSummary={selectedForViewing.summary}
-              sourceUrl={selectedForViewing.url}
+              sourceSummary={selectedForViewing.summary ?? undefined}
+              sourceUrl={selectedForViewing.url ?? undefined}
               sourceType={selectedForViewing.type}
               onClose={handleCloseViewer}
               highlightedCitation={highlightedCitation || undefined}
